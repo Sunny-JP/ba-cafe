@@ -320,7 +320,7 @@ export const OVERLAY_CONTENTS: Record<string, { title: string; body: React.React
             <h3 className="font-bold text-foreground border-b border-muted pb-1">連絡先・フィードバック</h3>
             <p className="text-sm leading-relaxed">
               不具合報告やご要望は、 
-              <a href="https://github.com/Sunny-JP/hw-ba-cafe" target="_blank" rel="noopener noreferrer" className="mx-1 hover:underline text-blue-400">
+              <a href="https://github.com/Sunny-JP/ba-cafe" target="_blank" rel="noopener noreferrer" className="mx-1 hover:underline text-blue-400">
                 GitHub
               </a> 
               または X (Twitter) までお願いいたします。
