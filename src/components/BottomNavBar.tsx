@@ -1,7 +1,7 @@
 import React from 'react';
-import { Timer, CalendarDays } from 'lucide-react';
+import { Timer, CalendarDays, Heart } from 'lucide-react';
 
-type Tab = 'timer' | 'history';
+type Tab = 'timer' | 'history' | 'bond';
 
 interface BottomNavBarProps {
   activeTab: Tab;
@@ -12,6 +12,7 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, setActiveTab }) 
   const tabs = [
     { id: 'timer' as const, icon: Timer },
     { id: 'history' as const, icon: CalendarDays },
+    { id: 'bond' as const, icon: Heart },
   ];
 
   return (

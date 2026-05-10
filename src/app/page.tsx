@@ -7,12 +7,13 @@ import Header from "@/components/Header";
 import TimerDashboard from "@/components/TimerDashboard";
 import BottomNavBar from "@/components/BottomNavBar";
 import HistoryCalendar from "@/components/HistoryCalendar";
+import BondDashboard from "@/components/BondDashboard";
 import Settings from "@/components/Settings";
 import SidePanel from "@/components/SidePanel";
 import { CALENDAR_LIMITS } from "@/lib/timeUtils";
 import { OVERLAY_CONTENTS } from "@/components/pages";
 
-type Tab = 'timer' | 'history';
+type Tab = 'timer' | 'history' | 'bond';
 
 const Overlay = ({ contentKey, onClose }: { contentKey: string; onClose: () => void }) => {
   const content = OVERLAY_CONTENTS[contentKey];
@@ -52,6 +53,7 @@ export default function Home() {
   const [calendarDate, setCalendarDate] = useState(() => new Date());
   const [ticket1Time, setTicket1Time] = useState<Date | null>(null);
   const [ticket2Time, setTicket2Time] = useState<Date | null>(null);
+  const [bondHistory, setBondHistory] = useState<any[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
@@ -59,6 +61,31 @@ export default function Home() {
   const [overlayKey, setOverlayKey] = useState<string | null>(null);
 
   const isInitialFetched = useRef(false);
+
+  const fetchBondHistory = useCallback(async () => {
+    const { data: { session: s } } = await supabase.auth.getSession();
+    if (!s) return;
+    try {
+      const res = await fetch('/api/bond', {
+        headers: { 'Authorization': `Bearer ${s.access_token}` }
+      });
+      const data = await res.json();
+      setBondHistory(Array.isArray(data) ? data : []);
+    } catch (e) { console.error(e); }
+  }, []);
+
+  const handleSaveBond = async (level: number, date: string, charKey: string) => {
+    if (!session || isSyncing) return;
+    setIsSyncing(true);
+    try {
+      await fetch('/api/bond', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ char_key: charKey, bond_level: level, recorded_at: date })
+      });
+      await fetchBondHistory();
+    } finally { setIsSyncing(false); }
+  };
 
   const fetchMonthlyData = useCallback(async (year: number, month: number) => {
     const { data: { session: s } } = await supabase.auth.getSession();
@@ -224,11 +251,15 @@ export default function Home() {
               <HistoryCalendar tapHistory={calendarHistory} currentDate={calendarDate} onMonthChange={handleMonthChange} />
             </div>
           )}
+          {activeTab === 'bond' && (
+            <BondDashboard bondHistory={bondHistory} onSave={handleSaveBond} />
+          )}
         </div>
-        <div className="hidden min-[1000px]:flex flex-1 items-center justify-center p-6 h-[calc(100vh-64px)] overflow-hidden">
-          <div className="grid grid-cols-2 gap-6 w-full max-w-[160svh] items-stretch mx-auto">
+        <div className="hidden min-[1000px]:flex flex-1 justify-center p-6 h-[calc(100vh-64px)] overflow-hidden">
+          <div className="grid grid-cols-3 gap-6 w-full max-w-[160svh] items-stretch mx-auto">
             <TimerDashboard tapHistory={timerHistory} lastTapTime={lastTapTime} ticket1Time={ticket1Time} ticket2Time={ticket2Time} onTap={handleTap} onInvite={handleInvite} isSyncing={isSyncing} isDataLoaded={isDataLoaded} />
             <HistoryCalendar tapHistory={calendarHistory} currentDate={calendarDate} onMonthChange={handleMonthChange} />
+            <BondDashboard bondHistory={bondHistory} onSave={handleSaveBond} />
           </div>
         </div>
         <BottomNavBar activeTab={activeTab} setActiveTab={setActiveTab} />
