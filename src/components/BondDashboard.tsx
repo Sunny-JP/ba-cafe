@@ -148,11 +148,10 @@ export default function BondDashboard({
       </div>
 
       {/* 2. 贈り物効率 */}
-      <div className="bond-card"> {/* カードの余白を最小限に */}
-        <h3 className="timer-card-title uppercase text-[10px] mb-1.5 ml-1">Favorite Gifts</h3>
-        
-        {/* grid-cols-5 を維持しつつ gap を最小の 1px に。padding も削る */}
-        <div className="flex flex-wrap justify-center gap-x-0.5 gap-y-4 px-0.5 py-1">
+      <div className="bond-card overflow-hidden">
+        <h3 className="timer-card-title uppercase text-[10px] ml-1">Favorite Gifts</h3>
+
+        <div className="flex flex-nowrap justify-start gap-x-1 pt-2 overflow-x-auto scrollbar-hide">
           {selectedChar && sortedGifts.map((gift) => {
             const rating = selectedChar.giftRatings[gift.name];
             const totalExp = gift.baseExp * GIFT_EXP[rating];
@@ -160,25 +159,32 @@ export default function BondDashboard({
             const col = gift.spriteIdx % SPRITE_CONFIG.cols;
 
             return (
-              <div key={gift.name} className="relative w-[56.8px] h-[44.8px] shrink-0">
-                <div className="gift-sprite-container w-full h-full border-none!">
-                  <div 
-                    className="gift-sprite"
-                    style={{ 
-                      '--col': col, 
-                      '--row': row,
-                      transform: 'scale(0.5)',
-                      position: 'absolute',
-                      top: 0,
-                      left: 0
-                    } as React.CSSProperties}
-                  />
+              <div key={gift.name} className="flex flex-col items-center shrink-0 w-13">
+                <div className="relative w-full h-12 mt-0.5">
+                  <div className="gift-sprite-container w-full h-full border-none">
+                    <div 
+                      className="gift-sprite"
+                      style={{ 
+                        '--col': col, 
+                        '--row': row,
+                        transform: 'scale(0.4)',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0
+                      } as React.CSSProperties}
+                    />
+                  </div>
+                  
+                  {/* 経験値 */}
+                  <div className={`multiplier-badge text-center rating-${rating.slice(-1)}`}>
+                    {totalExp}
+                  </div>
                 </div>
-                
-                {/* 経験値バッジ：左上に密着、paddingを最小化して文字を強調 */}
-                <div className={`multiplier-badge rating-${rating.slice(-1)}`}>
-                  {totalExp}
-                </div>
+
+                {/* 属性名 */}
+                <span className="text-[8px] mt-1 text-muted-foreground font-medium w-full text-center leading-none">
+                  {gift.category || "その他"}
+                </span>
               </div>
             );
           })}
