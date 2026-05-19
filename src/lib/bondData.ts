@@ -103,6 +103,20 @@ export const CHARACTER_LIST = [
       '大きなホールケーキ': 'nb',
     } as Record<string, keyof typeof GIFT_EXP>
   },
+  { 
+    id: 'mio', 
+    name: 'ミヤミヤ教授（マジカル）', 
+    giftRatings: {
+      'レースの枕': 'ss',
+      'サミュエラ「ザ・ビヨンド」': 'sa',
+      'チェリーローズカラーのグロス': 'na',
+      'お肌を透明にするBBクリーム': 'nb',
+      'ミリタリー用カモフラージュクリーム3種セット': 'nb',
+      '高級なクッキーセット': 'nb',
+      '抹茶味の瓶ラムネ': 'nb',
+      '可愛い食器セット': 'nb',
+    } as Record<string, keyof typeof GIFT_EXP>
+  }
 ] as const;
 
 export type CharacterId = typeof CHARACTER_LIST[number]['id'];

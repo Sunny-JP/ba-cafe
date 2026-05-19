@@ -301,6 +301,13 @@ body {
   align-items: center;
   justify-content: center;
 }
+.btn-timer-record {
+  width: 20%;
+  font-weight: 700;
+  padding: 2cqw 0;
+  margin-right: 10px;
+  font-size: 4.5cqw;
+}
 .btn-timer span,
 .btn-timer div {
   transform: skewX(10deg);
@@ -438,12 +445,11 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .bond-card {
-  background-color: var(--card);
-  border: 1px solid var(--muted);
-  border-radius: 1rem;
-  padding: 1rem;
-  margin-bottom: 0.75rem;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin-bottom: 2rem;
 }
 .bond-card span {
   font-feature-settings: "palt";
@@ -480,37 +486,19 @@ input[type="range"]::-moz-range-thumb {
   background-position: calc(var(--col) * -142px) calc(var(--row) * -112px);
   image-rendering: -webkit-optimize-contrast;
 }
-.gift-sprite-container {
-  width: 71px;
-  height: 56px;
-  overflow: hidden;
-  position: relative;
-  border-radius: 4px;
-  background-color: none;
+input[type="date"],
+input[type="number"] {
+  background: transparent;
   border: none;
-  margin-left: -5.5px;
-}
-.multiplier-badge {
-  position: absolute;
-  top: -11px;
-  left: 13.5px;
-  width: 20px;
+  outline: none;
+  color: var(--foreground);
   padding: 0;
-  background: none;
-  color: #000;
-  border: none;
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 0.06em;
+  appearance: none;
+  -webkit-appearance: none;
 }
-.rating-s {
-  color: #ffa1f3;
-}
-.rating-a {
-  color: #f7bf19;
-}
-.rating-b {
-  color: #4bd5ff;
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.5);
+  cursor: pointer;
 }
 
 .recharts-default-tooltip {
