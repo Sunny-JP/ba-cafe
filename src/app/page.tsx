@@ -241,8 +241,12 @@ export default function Home() {
       
       {overlayKey && <Overlay contentKey={overlayKey} onClose={() => setOverlayKey(null)} />}
 
-      <main className="flex-1 flex flex-col pt-16 pb-16 min-[1000px]:pb-0">
-        <div className="min-[1000px]:hidden flex-1">
+      <main className="flex-1 flex flex-col pt-16 pb-16">
+        
+        {/* ==========================================
+            スマホ表示 (幅1000px未満): 3画面完全個別切替
+           ========================================== */}
+        <div className="min-[1000px]:hidden flex-1 overflow-y-auto">
           {activeTab === 'timer' && (
             <TimerDashboard tapHistory={timerHistory} lastTapTime={lastTapTime} ticket1Time={ticket1Time} ticket2Time={ticket2Time} onTap={handleTap} onInvite={handleInvite} isSyncing={isSyncing} isDataLoaded={isDataLoaded} />
           )}
@@ -255,14 +259,33 @@ export default function Home() {
             <BondDashboard bondHistory={bondHistory} onSave={handleSaveBond} />
           )}
         </div>
-        <div className="hidden min-[1000px]:flex flex-1 justify-center p-6 h-[calc(100vh-64px)] overflow-hidden">
-          <div className="grid grid-cols-3 gap-6 w-full max-w-[160svh] items-stretch mx-auto">
-            <TimerDashboard tapHistory={timerHistory} lastTapTime={lastTapTime} ticket1Time={ticket1Time} ticket2Time={ticket2Time} onTap={handleTap} onInvite={handleInvite} isSyncing={isSyncing} isDataLoaded={isDataLoaded} />
-            <HistoryCalendar tapHistory={calendarHistory} currentDate={calendarDate} onMonthChange={handleMonthChange} />
-            <BondDashboard bondHistory={bondHistory} onSave={handleSaveBond} />
+
+        {/* ==========================================
+            PC表示 (幅1000px以上): 2画面フルスクリーン切替
+           ========================================== */}
+        <div className="hidden min-[1000px]:flex flex-1 justify-center px-4 py-4 h-[calc(100vh-120px)] overflow-hidden">
+          <div className="w-full h-full mx-auto flex items-stretch">
+            
+            {/* パネル1: タイマー＆カレンダー同時展開 (左右均等に画面いっぱいへ引き伸ばす) */}
+            {(activeTab === 'timer' || activeTab === 'history') && (
+              <div className="grid grid-cols-2 gap-8 w-full h-full items-stretch animate-in fade-in duration-200">
+                <TimerDashboard tapHistory={timerHistory} lastTapTime={lastTapTime} ticket1Time={ticket1Time} ticket2Time={ticket2Time} onTap={handleTap} onInvite={handleInvite} isSyncing={isSyncing} isDataLoaded={isDataLoaded} />
+                <HistoryCalendar tapHistory={calendarHistory} currentDate={calendarDate} onMonthChange={handleMonthChange} />
+              </div>
+            )}
+
+            {/* パネル2: 贈り物単独画面 (幅制限をなくし、画面いっぱいに表示) */}
+            {activeTab === 'bond' && (
+              <div className="w-full h-full overflow-y-auto animate-in fade-in">
+                <BondDashboard bondHistory={bondHistory} onSave={handleSaveBond} />
+              </div>
+            )}
+
           </div>
         </div>
+
         <BottomNavBar activeTab={activeTab} setActiveTab={setActiveTab} />
+        
         <SidePanel isOpen={isSidePanelOpen} onClose={() => setIsSidePanelOpen(false)}>
           <Settings onOpenContent={(key) => { setOverlayKey(key); setIsSidePanelOpen(false); }} />
         </SidePanel>

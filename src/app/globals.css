@@ -23,6 +23,8 @@
   --tap-bg-6: hsl(var(--tap-h) var(--tap-s) 73%);
   --tap-bg-7: hsl(var(--tap-h) var(--tap-s) 66%);
   --tap-bg-8: hsl(var(--tap-h) var(--tap-s) 59%);
+
+  --system-color-scheme: light;
 }
 
 .dark {
@@ -48,6 +50,21 @@
   --tap-bg-3: hsl(var(--tap-h) var(--tap-s) 23%);
   --tap-bg-2: hsl(var(--tap-h) var(--tap-s) 16%);
   --tap-bg-1: hsl(var(--tap-h) var(--tap-s) 12%);
+
+  --system-color-scheme: dark;
+}
+
+/* ==========================================
+   スクロールバーをすべての場所で完全に非表示化
+   ========================================== */
+*,
+*::before,
+*::after {
+  -ms-overflow-style: none !important; /* IE, Edge */
+  scrollbar-width: none !important; /* Firefox */
+}
+*::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari, Opera */
 }
 
 html {
@@ -65,7 +82,7 @@ html {
 }
 @media (min-width: 1000px) {
   :root {
-    --bottom-nav-height: 0px;
+    --bottom-nav-height: 56px;
   }
 }
 
@@ -301,13 +318,7 @@ body {
   align-items: center;
   justify-content: center;
 }
-.btn-timer-record {
-  width: 20%;
-  font-weight: 700;
-  padding: 2cqw 0;
-  margin-right: 10px;
-  font-size: 4.5cqw;
-}
+
 .btn-timer span,
 .btn-timer div {
   transform: skewX(10deg);
@@ -431,6 +442,14 @@ input[type="range"]::-moz-range-thumb {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
+.view-panel {
+  display: none;
+  width: 100%;
+}
+.view-panel.active {
+  display: block;
+}
+
 .mobile-view {
   display: block;
   margin-top: 3rem;
@@ -440,116 +459,36 @@ input[type="range"]::-moz-range-thumb {
   display: none;
 }
 .desktop-hidden {
-  display: flex;
-  z-index: 9999;
+  display: none;
+}
+.dashboard-container {
+  gap: 2cqw;
+  padding: 2cqw 2cqw 2cqw 5cqw;
+}
+.cal-container {
+  padding: 2cqw 5cqw 2cqw 2cqw;
+}
+.bond-container {
+  padding: 5cqw;
 }
 
-.bond-card {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  margin-bottom: 2rem;
+.timer-card-title {
+  font-size: 3cqw;
 }
-.bond-card span {
-  font-feature-settings: "palt";
+.countdown-text-l {
+  font-size: 11cqw;
 }
-.bond-select {
-  background-color: var(--background);
-  border: 1px solid var(--muted);
-  border-radius: 0.5rem;
-  padding: 0.75rem;
-  font-weight: 700;
-  width: 100%;
-  outline: none;
+.countdown-text-s {
+  font-size: 7.5cqw;
 }
-.flex-nowrap {
-  scroll-snap-type: x proximity;
-  -webkit-overflow-scrolling: touch;
-}
-.scrollbar-hide {
-  -ms-overflow-style: none; /* IE, Edge */
-  scrollbar-width: none; /* Firefox */
-}
-.scrollbar-hide::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
-}
-.gift-sprite {
-  background-image: url("gifts.png");
-  background-repeat: no-repeat;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 142px;
-  height: 112px;
-  transform-origin: 0 0;
-  background-position: calc(var(--col) * -142px) calc(var(--row) * -112px);
-  image-rendering: -webkit-optimize-contrast;
-}
-input[type="date"],
-input[type="number"] {
-  background: transparent;
-  border: none;
-  outline: none;
-  color: var(--foreground);
-  padding: 0;
-  appearance: none;
-  -webkit-appearance: none;
-}
-input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(0.5);
-  cursor: pointer;
-}
-
-.recharts-default-tooltip {
-  background-color: var(--card) !important;
-  color: var(--foreground) !important;
-  border: none !important;
-  border-radius: 0.75rem !important;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+.btn-timer {
+  padding: 2cqw 0;
+  font-size: 3.5cqw;
 }
 
 @media (min-width: 1000px) {
   html {
     font-size: 0.875rem;
-  }
-  .mobile-view {
-    display: none;
-  }
-  .desktop-view {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.5rem;
-    margin-top: 2rem;
-    padding: 1.5rem;
-    align-items: normal;
-  }
-  .desktop-hidden {
-    display: none;
-  }
-  .dashboard-container {
-    gap: 2cqw;
-    padding: 1cqw;
-  }
-  .cal-container {
-    padding: 1cqw;
-  }
-  .bond-container {
-    padding: 1cqw;
-  }
-
-  .timer-card-title {
-    font-size: 3cqw;
-  }
-  .countdown-text-l {
-    font-size: 11cqw;
-  }
-  .countdown-text-s {
-    font-size: 7.5cqw;
-  }
-  .btn-timer {
-    padding: 2cqw 0;
-    font-size: 3.5cqw;
   }
 }
 
@@ -579,5 +518,545 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   100% {
     transform: scale(1.2);
     opacity: 0;
+  }
+}
+
+/* ==========================================
+   BondDashboard カスタムクラス (完全下揃え・cqw連動版)
+   ========================================== */
+
+.bond-container {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  padding: 5cqw;
+}
+
+.bond-split-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 5cqw;
+  width: 100%;
+}
+
+.bond-left-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 1. キャラクター選択 */
+.char-selector {
+  position: relative;
+  margin-bottom: 2cqw;
+}
+
+.char-selector-trigger {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.char-selector-label,
+.input-label {
+  font-size: 2.2cqw;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 0.8cqw;
+  color: var(--secondary-foreground);
+}
+
+.char-selector-name {
+  font-size: 7cqw;
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  display: flex;
+  align-items: baseline;
+  gap: 2cqw;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.char-selector-arrow {
+  font-size: 3.5cqw;
+  color: var(--primary);
+  transition: transform 0.3s ease;
+}
+
+.char-selector-arrow.open {
+  transform: rotate(180deg);
+}
+
+.char-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 2cqw;
+  width: 45cqw;
+  max-width: 16rem;
+  max-height: 50cqw;
+  overflow-y: auto;
+  z-index: 50;
+  background-color: var(--card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 2cqw;
+}
+
+.char-dropdown-container {
+  padding: 1.5cqw;
+}
+
+.char-dropdown-item {
+  width: 100%;
+  text-align: left;
+  padding: 1.5cqw 3cqw;
+  border-radius: 1.5cqw;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--foreground);
+  font-weight: 700;
+  font-size: 3cqw;
+}
+
+.char-dropdown-item.active {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+/* 2. ランク・日付記録入力エリア */
+.record-input-area {
+  display: flex;
+  align-items: flex-end; /* 右側のRECORDボタンを常時下揃えに固定 */
+  justify-content: space-between;
+  gap: 4cqw;
+  border-bottom: 1px solid rgba(var(--muted), 0.2);
+  padding-bottom: 4cqw;
+}
+
+.input-group-container {
+  display: flex;
+  align-items: baseline; /* ラベルも含め、RankエリアとDateエリア全体のベースラインを統一 */
+  gap: 4cqw;
+  flex: 1;
+}
+
+.input-field-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-content {
+  display: flex;
+  width: 20.5cqw;
+}
+
+.rank-prefix {
+  font-size: 3.5cqw;
+  font-weight: 900;
+  line-height: 1;
+  margin-top: 2.2cqw;
+}
+
+.rank-value {
+  font-size: 6cqw;
+  font-weight: 900;
+  line-height: 1;
+  display: inline-block;
+  margin-left: 0.5cqw;
+  width: 9cqw;
+}
+
+/* 上下ボタンをインラインのベースライン要素として再定義し、数値の底辺と完全に連動 */
+.spin-buttons-box {
+  display: inline-block;
+  vertical-align: baseline;
+  margin-left: 1.5cqw;
+}
+
+.spin-btn {
+  width: 4cqw;
+  height: 3.2cqw; /* 高さを微調整 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(var(--muted), 0.3);
+  border: none;
+  cursor: pointer;
+  font-size: 2cqw;
+  color: var(--foreground);
+}
+
+.spin-btn.up {
+  border-radius: 0.8cqw 0.8cqw 0 0;
+  margin-bottom: 2px;
+}
+
+.spin-btn.down {
+  border-radius: 0 0 0.8cqw 0.8cqw;
+}
+
+/* 高さをコンテナ側で縛らず、フォントのbaselineをそのまま露出させることでLV.と完全同期 */
+.date-input-display {
+  font-size: 6cqw;
+  font-weight: 700;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0;
+  width: 40cqw;
+  line-height: 1; /* 高さに縛られず文字のベースラインを露出 */
+  color-scheme: var(--system-color-scheme);
+  margin-top: -0.5cqw;
+}
+
+.btn-bond-record {
+  width: 18cqw;
+  height: 9cqw;
+  flex-shrink: 0;
+  font-weight: 700;
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border: none;
+  cursor: pointer;
+  transform: skewX(-10deg);
+  border-radius: 1.5cqw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-bond-record span {
+  font-size: 2cqw;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  transform: skewX(10deg);
+  margin-bottom: -0.5cqw;
+}
+
+.btn-bond-record div {
+  font-size: 3.5cqw;
+  transform: skewX(10deg);
+  line-height: 1;
+}
+
+/* 3. 各アコーディオン共通 */
+.section-wrapper {
+  margin-top: 4cqw;
+}
+
+.section-toggle-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 1.5cqw;
+  font-size: 2.2cqw;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 2cqw;
+  color: var(--secondary-foreground);
+}
+
+.section-toggle-arrow {
+  transition: transform 0.3s ease;
+}
+
+.section-toggle-arrow.open {
+  transform: rotate(180deg);
+}
+
+.graph-container {
+  height: 35cqw;
+  width: 100%;
+}
+
+/* 4. 贈り物（Favorite Gifts）表示調整 */
+.gift-title {
+  font-size: 2.2cqw;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 2cqw;
+  color: var(--secondary-foreground);
+}
+
+.gift-scroll-container {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 1.5cqw;
+  overflow-x: auto;
+  padding-bottom: 2cqw;
+  width: 100%;
+}
+
+.gift-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 50px;
+  height: 70px;
+}
+
+.gift-image-box {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  margin-bottom: 1cqw;
+}
+
+.gift-sprite {
+  background-image: url("gifts.png");
+  background-repeat: no-repeat;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 142px;
+  height: 112px;
+  transform: translate(-50%, -50%) scale(0.48);
+  transform-origin: center center;
+  background-position: calc(var(--col) * -142px) calc(var(--row) * -112px);
+  image-rendering: -webkit-optimize-contrast;
+}
+
+.gift-rank-dot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2cqw;
+  height: 2cqw;
+  border-radius: 9999px;
+  border: 1px solid var(--background);
+  z-index: 10;
+}
+.gift-rank-dot.s {
+  background-color: #ef4444;
+}
+.gift-rank-dot.a {
+  background-color: #fb923c;
+}
+.gift-rank-dot.b {
+  background-color: #3b82f6;
+}
+
+.gift-category-text {
+  font-size: 2cqw;
+  text-align: center;
+  font-weight: 500;
+  width: 100%;
+  white-space: nowrap;
+}
+
+/* 5. 履歴リスト */
+.history-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2cqw;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2cqw 0;
+  border-bottom: 1px solid rgba(var(--muted), 0.1);
+}
+
+.history-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.history-date {
+  font-size: 2cqw;
+  font-family: monospace;
+}
+
+.history-rank {
+  font-size: 3cqw;
+  font-weight: 700;
+}
+
+.edit-btn {
+  font-size: 2cqw;
+  font-weight: 900;
+  color: var(--primary);
+  border: 1px solid rgba(var(--primary), 0.3);
+  background: transparent;
+  padding: 1cqw 2.5cqw;
+  border-radius: 9999px;
+  cursor: pointer;
+}
+
+/* ==========================================
+   PC表示時（@media 1000px以上）の最適化固定値上書き
+   ========================================== */
+@media (min-width: 1000px) {
+  .bond-split-layout {
+    flex-direction: row;
+    align-items: stretch;
+    gap: 4rem;
+  }
+
+  .bond-left-panel {
+    flex: 1.2;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .bond-right-panel {
+    flex: 1.8;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid rgba(var(--muted), 0.15);
+    padding-left: 3rem;
+  }
+
+  .char-selector-name {
+    font-size: 2.4cqw;
+    gap: 0.5cqw;
+  }
+  .char-selector-label,
+  .input-label {
+    font-size: 0.8cqw;
+  }
+  .char-selector-arrow {
+    font-size: 1rem;
+  }
+  .char-dropdown {
+    width: 16rem;
+    max-height: 20rem;
+    border-radius: 1rem;
+  }
+  .char-dropdown-container {
+    padding: 0.5cqw;
+  }
+  .char-dropdown-item {
+    font-size: 0.875rem;
+    padding: 0.25rem 1rem;
+  }
+
+  .record-input-area {
+    padding-bottom: 1.5rem;
+  }
+  .input-group-container {
+    gap: 1.5rem;
+  }
+
+  .input-content {
+    display: flex;
+    width: 8cqw;
+  }
+
+  .rank-prefix {
+    font-size: 1cqw;
+    margin-top: 0.9cqw;
+  }
+
+  .rank-value {
+    font-size: 2cqw;
+    font-weight: 900;
+    line-height: 1;
+    display: inline-block;
+    margin-left: 0.5cqw;
+    width: 5cqw;
+  }
+
+  /* 上下ボタンをインラインのベースライン要素として再定義し、数値の底辺と完全に連動 */
+  .spin-buttons-box {
+    display: inline-block;
+    vertical-align: baseline;
+    margin-left: -1cqw;
+  }
+
+  .spin-btn {
+    width: 1cqw;
+    height: 1cqw; /* 高さを微調整 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(var(--muted), 0.3);
+    border: none;
+    cursor: pointer;
+    font-size: 0.8cqw;
+    color: var(--foreground);
+  }
+
+  .date-input-display {
+    font-size: 2cqw;
+    width: 14cqw;
+    margin-top: -0.25cqw;
+  }
+
+  .btn-bond-record {
+    width: 6.5rem;
+    height: 3rem;
+    border-radius: 0.75rem;
+    margin-left: 6cqw;
+  }
+  .btn-bond-record span {
+    font-size: 10px;
+    margin-bottom: -0.1cqw;
+  }
+  .btn-bond-record div {
+    font-size: 12px;
+  }
+
+  .section-wrapper {
+    margin-top: 2rem;
+  }
+  .section-toggle-btn,
+  .gift-title {
+    font-size: 0.8cqw;
+    margin-bottom: 0.375rem;
+  }
+
+  .gift-scroll-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(4rem, 1fr));
+    gap: 0;
+    overflow-x: visible;
+  }
+  .gift-image-box {
+    border-radius: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .gift-rank-dot {
+    width: 0.7cqw;
+    height: 0.7cqw;
+  }
+  .gift-category-text {
+    font-size: 0.7cqw;
+  }
+
+  .history-list-container {
+    gap: 0.5rem;
+  }
+  .history-item {
+    padding: 0.75rem 0;
+  }
+  .history-date {
+    font-size: 10px;
+  }
+  .history-rank {
+    font-size: 0.875rem;
+  }
+  .edit-btn {
+    font-size: 9px;
+    padding: 0.25rem 0.75rem;
+  }
+
+  .graph-container {
+    height: 100% !important;
+    min-height: 25rem;
+    width: 100%;
+    flex: 1;
   }
 }
