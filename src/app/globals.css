@@ -689,17 +689,14 @@ input[type="range"]::-moz-range-thumb {
   font-size: 2cqw;
   color: var(--foreground);
 }
-
 .spin-btn.up {
   border-radius: 0.8cqw 0.8cqw 0 0;
   margin-bottom: 2px;
 }
-
 .spin-btn.down {
   border-radius: 0 0 0.8cqw 0.8cqw;
 }
 
-/* 高さをコンテナ側で縛らず、フォントのbaselineをそのまま露出させることでLV.と完全同期 */
 .date-input-display {
   font-size: 6cqw;
   font-weight: 700;
@@ -707,8 +704,9 @@ input[type="range"]::-moz-range-thumb {
   border: none;
   outline: none;
   padding: 0;
-  width: 40cqw;
-  line-height: 1; /* 高さに縛られず文字のベースラインを露出 */
+  width: 42cqw;
+  line-height: 1;
+  letter-spacing: 0.03em;
   color-scheme: var(--system-color-scheme);
   margin-top: -0.5cqw;
 }
@@ -729,7 +727,6 @@ input[type="range"]::-moz-range-thumb {
   align-items: center;
   justify-content: center;
 }
-
 .btn-bond-record span {
   font-size: 2cqw;
   font-weight: 900;
@@ -738,7 +735,6 @@ input[type="range"]::-moz-range-thumb {
   transform: skewX(10deg);
   margin-bottom: -0.5cqw;
 }
-
 .btn-bond-record div {
   font-size: 3.5cqw;
   transform: skewX(10deg);
