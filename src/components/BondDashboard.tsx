@@ -3,12 +3,13 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   XAxis, YAxis, CartesianGrid, 
-  ResponsiveContainer, AreaChart, Area 
+  ResponsiveContainer, AreaChart, Area, Tooltip
 } from 'recharts';
-import { format } from 'date-fns';
+import { format, subDays } from 'date-fns';
 import { 
   CHARACTER_LIST, GIFT_LIST, 
-  SPRITE_CONFIG, CharacterId
+  SPRITE_CONFIG, CharacterId,
+  BOND_EXP_TABLE
 } from '@/lib/bondData';
 
 interface BondRecord {
@@ -16,6 +17,19 @@ interface BondRecord {
   bond_level: number;
   recorded_at: string;
 }
+
+// 累計EXPから現在の絆ランクを逆引きするヘルパー関数
+const getLevelFromExp = (exp: number): number => {
+  let currentLevel = 1;
+  for (let lv = 1; lv <= 100; lv++) {
+    if (BOND_EXP_TABLE[lv] !== undefined && exp >= BOND_EXP_TABLE[lv]) {
+      currentLevel = lv;
+    } else {
+      break;
+    }
+  }
+  return currentLevel;
+};
 
 export default function BondDashboard({ 
   bondHistory, 
@@ -31,8 +45,6 @@ export default function BondDashboard({
   const [inputDate, setInputDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   
   const [isSelectOpen, setIsSelectOpen] = useState(false);
-  const [isGraphOpen, setIsGraphOpen] = useState(false);
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -43,11 +55,7 @@ export default function BondDashboard({
 
   const sortedGifts = useMemo(() => {
     const ratingOrder: Record<string, number> = {
-      'ss': 1,
-      'sa': 2,
-      'ns': 3,
-      'na': 4,
-      'nb': 5
+      'ss': 1, 'sa': 2, 'ns': 3, 'na': 4, 'nb': 5
     };
 
     return GIFT_LIST
@@ -55,15 +63,53 @@ export default function BondDashboard({
       .sort((a, b) => {
         const ratingA = selectedChar.giftRatings[a.name]?.toLowerCase() || '';
         const ratingB = selectedChar.giftRatings[b.name]?.toLowerCase() || '';
-        
         const orderA = ratingOrder[ratingA] || 99;
         const orderB = ratingOrder[ratingB] || 99;
-        
         return orderA - orderB;
       });
   }, [selectedChar]);
 
-  // レスポンシブ幅を動的取得してグラフ表示ロジックを切り替える
+  const filteredHistory = useMemo(() => {
+    return bondHistory
+      .filter(h => h.char_key === selectedCharId)
+      .sort((a, b) => b.recorded_at.localeCompare(a.recorded_at));
+  }, [bondHistory, selectedCharId]);
+
+  const displayHistoryRows = useMemo(() => {
+    const rows = [];
+    for (let i = 0; i < 10; i++) {
+      rows.push(filteredHistory[i] || null);
+    }
+    return rows;
+  }, [filteredHistory]);
+
+  // グラフ用データ：実データがあれば累計EXPに変換、無ければ「毎日100exp」のモックを生成
+  const graphData = useMemo(() => {
+    if (filteredHistory.length > 0) {
+      // 過去の記録を古い順にソートし、それぞれのランクに応じた累計EXPをマッピング
+      return [...filteredHistory]
+        .reverse()
+        .map(h => ({
+          recorded_at: h.recorded_at,
+          cumulative_exp: BOND_EXP_TABLE[h.bond_level] || 0,
+          bond_level: h.bond_level
+        }));
+    }
+
+    // モックデータ: 直近730日間、毎日100expずつ増える計算
+    const mockData = [];
+    for (let i = 730; i >= 0; i--) {
+      const dateStr = format(subDays(new Date(), i), 'yyyy-MM-dd');
+      const cumulativeExp = (730 - i) * 330;
+      mockData.push({
+        recorded_at: dateStr,
+        cumulative_exp: cumulativeExp,
+        bond_level: getLevelFromExp(cumulativeExp)
+      });
+    }
+    return mockData;
+  }, [filteredHistory]);
+
   useEffect(() => {
     const handleResize = () => {
       setIsDesktop(window.innerWidth >= 1000);
@@ -93,21 +139,80 @@ export default function BondDashboard({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // グラフコンポーネントを共通化
-  const RenderGraph = () => (
+  const renderGraph = (
     <div className="graph-container">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={bondHistory.filter(h => h.char_key === selectedCharId)}>
+        <AreaChart data={graphData} margin={{ top: 5, right: 5, left: -20, bottom: -10 }}>
           <defs>
             <linearGradient id="colorExp" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.2}/>
+              <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.4}/>
+              <stop offset="60%" stopColor="var(--primary)" stopOpacity={0.2}/>
               <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--muted)" opacity={0.2} />
-          <XAxis dataKey="recorded_at" hide />
-          <YAxis hide domain={[0, 100]} />
-          <Area type="monotone" dataKey="bond_level" stroke="var(--primary)" strokeWidth={3} fillOpacity={1} fill="url(#colorExp)" />
+          
+          {/* 1. CartesianGrid から上下の境界線の描画をカットします */}
+          <CartesianGrid 
+            strokeDasharray="3 3" 
+            vertical={false} 
+            stroke="var(--secondary)" 
+            opacity={0.2}
+          />
+          
+          {/* 2. XAxis の hide を解除し、現在のUIに合わせてデザインを適用 */}
+          <XAxis 
+            dataKey="recorded_at" 
+            tickLine={false}
+            axisLine={false}
+            stroke="var(--secondary-foreground)"
+            fontSize={9}
+            tickCount={4}
+            tickFormatter={(dateStr) => {
+              try {
+                const parts = dateStr.split('-');
+                if (parts.length === 3) return `${parts[0]}/${parts[1]}`;
+              } catch (e) {}
+              return dateStr;
+            }}
+          />
+          
+          {/* 3. YAxis の domain をキリ良く調整し、上下のグリッド線とテキストの被りを回避 */}
+          <YAxis 
+            dataKey="cumulative_exp" 
+            domain={[0, 240225]} /* 下限を0にして目盛りの被りを抑制 */
+            ticks={[0, 14790, 29175, 50835, 81270, 121980, 174465, 240225]}
+            tickFormatter={(exp) => `Lv.${getLevelFromExp(exp)}`}
+            stroke="var(--secondary-foreground)"
+            fontSize={10}
+            tickLine={false}
+            axisLine={false}
+          />
+          
+          <Tooltip 
+            labelFormatter={(label) => `Date: ${label}`}
+            formatter={(value: any, name: any, props: any) => [
+              `RANK ${props.payload.bond_level} (${value} exp)`
+            ]}
+            contentStyle={{
+              background: 'var(--card)',
+              border: '1px solid var(--muted)',
+              borderRadius: '0.5rem',
+              fontSize: '0.85rem',
+            }}
+            labelStyle={{
+              color: 'var(--foreground)',
+              fontWeight: 700
+            }}
+          />
+          
+          <Area 
+            type="monotone"
+            dataKey="cumulative_exp" 
+            stroke="var(--primary)" 
+            strokeWidth={3} 
+            fillOpacity={1} 
+            fill="url(#colorExp)" 
+          />
         </AreaChart>
       </ResponsiveContainer>
     </div>
@@ -117,7 +222,7 @@ export default function BondDashboard({
     <div className="bond-container">
       <div className="bond-split-layout">
         
-        {/* 左側パネル (スマホ時はこれが全画面シーケンスになります) */}
+        {/* 左側パネル */}
         <div className="bond-left-panel">
           
           {/* 1. キャラクター生徒選択 */}
@@ -233,63 +338,66 @@ export default function BondDashboard({
             </div>
           </div>
 
-          {/* 4. 絆上げ履歴部分 (History Log) */}
+          {/* 4. 絆上げ履歴部分 */}
           <div className="section-wrapper">
-            <button 
-              onClick={() => setIsHistoryOpen(!isHistoryOpen)} 
-              className="section-toggle-btn"
-            >
+            <h3 className="section-toggle-btn" style={{ cursor: 'default' }}>
               <span>History Log</span>
-              <span className={`section-toggle-arrow ${isHistoryOpen ? 'open' : ''}`}>▼</span>
-            </button>
-            {isHistoryOpen && (
-              <div className="history-list-container animate-in fade-in slide-in-from-top-2">
-                {bondHistory
-                  .filter(h => h.char_key === selectedCharId)
-                  .sort((a, b) => b.recorded_at.localeCompare(a.recorded_at))
-                  .map((record) => (
-                    <div key={record.recorded_at} className="history-item">
-                      <div className="history-meta">
-                        <span className="history-date">{record.recorded_at}</span>
-                        <span className="history-rank">RANK {record.bond_level}</span>
-                      </div>
-                      <button 
-                        onClick={() => handleEdit(record)} 
-                        className="edit-btn"
-                      >
-                        EDIT
-                      </button>
-                    </div>
-                  ))}
-              </div>
-            )}
+            </h3>
+            <div className="history-grid-container">
+              {displayHistoryRows.map((record, index) => (
+                <div key={record ? record.recorded_at : `empty-${index}`} className="history-item">
+                  <div className="history-log-row">
+                    {record ? (
+                      <>
+                        <span className="history-rank-num">
+                          {record.bond_level}
+                        </span>
+                        <span className="history-divider">|</span>
+                        <span className="history-date-text">
+                          {record.recorded_at}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="history-empty-text">
+                        -- <span className="history-divider">|</span> --/--/--
+                      </span>
+                    )}
+                  </div>
+                  
+                  {record ? (
+                    <button 
+                      onClick={() => handleEdit(record)} 
+                      className="edit-btn"
+                    >
+                      EDIT
+                    </button>
+                  ) : (
+                    <span className="edit-btn-placeholder" />
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* 5. スマホ表示時のみここに配置されるグラフ表示（アコーディオン式） */}
+          {/* 5. スマホ表示時のみここに配置される Progress Graph */}
           {!isDesktop && (
             <div className="section-wrapper">
-              <button 
-                onClick={() => setIsGraphOpen(!isGraphOpen)} 
-                className="section-toggle-btn"
-              >
+              <h3 className="section-toggle-btn" style={{ cursor: 'default' }}>
                 <span>Progress Graph</span>
-                <span className={`section-toggle-arrow ${isGraphOpen ? 'open' : ''}`}>▼</span>
-              </button>
-              {isGraphOpen && (
-                <div className="animate-in fade-in slide-in-from-top-2">
-                  <RenderGraph />
-                </div>
-              )}
+              </h3>
+              <div className="animate-in fade-in duration-200">
+                {renderGraph}
+              </div>
             </div>
           )}
 
         </div>
 
-        {/* 右側パネル (PC表示時のみ出現し、グラフを大きく常時表示) */}
+        {/* 右側パネル (PC表示時の Progress Graph) */}
         {isDesktop && (
           <div className="bond-right-panel animate-in fade-in duration-300">
             <h3 className="section-toggle-btn" style={{ cursor: 'default' }}>Progress Graph</h3>
-            <RenderGraph />
+            {renderGraph}
           </div>
         )}
 

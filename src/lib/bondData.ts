@@ -66,7 +66,7 @@ export const GIFT_LIST = [
   { name: 'MX-レーションC型デザート風味', category:'スイセン', baseExp: 40, spriteIdx: 32 },
   { name: '抹茶味の瓶ラムネ', category:'スイセン', baseExp: 40, spriteIdx: 33 },
   { name: 'ゼリーズの枕', category:'牡丹', baseExp: 40, spriteIdx: 34 },
-  { name: '跳躍探偵ウサギ〜霧に包まれた温泉での滑落〜', category:'チューリップ', baseExp: 40, spriteIdx: 35 },
+  { name: '跳躍探偵ウサギ～霧に包まれた温泉での滑落～', category:'チューリップ', baseExp: 40, spriteIdx: 35 },
   { name: 'O-フィット', category:'アサガオ', baseExp: 40, spriteIdx: 36 },
   { name: '埋蔵金の地図', category:'タンポポ', baseExp: 40, spriteIdx: 37 },
   { name: 'コスプレ用ぐるぐるメガネ', category:'百日紅', baseExp: 40, spriteIdx: 38 },
