@@ -124,7 +124,7 @@ export default function TimerDashboard({
   return (
     <div className="dashboard-container">
       <div className="timer-card">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-2">
           <h2 className="timer-card-title">Next Tap</h2>
         </div>
 
@@ -174,7 +174,7 @@ export default function TimerDashboard({
         <h2 className="timer-card-title mb-4">Next Call</h2>
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
-            <div className="countdown-text-s bg-background/50 p-2 rounded">
+            <div className="countdown-text-s bg-background/50 pt-1 pl-1 rounded">
               <CountdownDisplay milliseconds={ticket1Remaining} />
             </div>
             <button 
@@ -184,7 +184,7 @@ export default function TimerDashboard({
             ><span>{ isSyncing ? 'Wait...' : 'Ticket 1' }</span></button>
           </div>
           <div className="flex flex-col gap-2">
-            <div className="countdown-text-s bg-background/50 p-2 rounded">
+            <div className="countdown-text-s bg-background/50 pt-1 pl-1 rounded">
               <CountdownDisplay milliseconds={ticket2Remaining} />
             </div>
             <button 
