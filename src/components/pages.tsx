@@ -103,7 +103,7 @@ export const OVERLAY_CONTENTS: Record<string, { title: string; body: React.React
           <h3 className="font-bold text-foreground">
             Q: 記録を間違えてタップしてしまいました。削除できますか？</h3>
           <p className="font-normal text-sm">
-            A: Tap履歴を個別に編集・削除することはできません。データベースへの接続増加を伴うため、現時点では実装予定はありません。</p>
+            A: Tap履歴を個別に編集・削除することはできません。なお，絆ランク記録は直近10件のデータまで編集可能です。</p>
         </div>
 
         <div className="flex flex-col gap-1">
@@ -141,14 +141,14 @@ export const OVERLAY_CONTENTS: Record<string, { title: string; body: React.React
           <h3 className="font-bold text-foreground">
             Q: オフラインでも利用できますか？</h3>
           <p className="font-normal text-sm">
-            A: 利用できません。インターネットに接続が必要です。</p>
+            A: 利用できません。インターネットへの接続が必要です。</p>
         </div>
 
         <div className="flex flex-col gap-1">
           <h3 className="font-bold text-foreground">
             Q: ゲーム内部のデータを使用していますか？</h3>
           <p className="font-normal text-sm">
-            A: 本サイトはゲーム「ブルーアーカイブ」内のいかなるアセットも使用していません。また、ゲームデータにもアクセスしていませんので、本サイトがゲーム内のアカウントに影響を与えることはありません。</p>
+            A: 本サイトはゲーム「ブルーアーカイブ」内に実装されている機能などは使用していません。また、ゲームデータ自体にもアクセスしていませんので、本サイトがゲーム内のアカウントに影響を与えることはありません。</p>
         </div>
 
         <div className="flex flex-col gap-1">
@@ -283,6 +283,7 @@ export const OVERLAY_CONTENTS: Record<string, { title: string; body: React.React
     title: "運営者情報・変更履歴",
     body: (() => {
       const updateLogs = [
+        { date: '2026-06-07', content: '絆ランク記録機能追加' },
         { date: '2026-02-08', content: '初回リリース' },
       ];
 
@@ -308,8 +309,8 @@ export const OVERLAY_CONTENTS: Record<string, { title: string; body: React.React
             <h3 className="font-bold text-foreground border-b border-muted pb-1">変更履歴</h3>
             <div className="bg-background/50 rounded-md p-1.5 max-h-48 overflow-y-auto space-y-2 text-sm">
               {updateLogs.map((log, index) => (
-                <div key={index} className="flex gap-3 border-b border-muted/30 pb-1.5 last:border-0">
-                  <span className="font-mono shrink-0">{log.date}</span>
+                <div key={index} className="flex gap-3">
+                  <span className="shrink-0">{log.date}</span>
                   <p className="text-foreground/80">{log.content}</p>
                 </div>
               ))}

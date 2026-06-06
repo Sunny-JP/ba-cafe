@@ -534,6 +534,7 @@ export const CHARACTER_LIST = [
       '『銃 可愛い 青春』': 'na',
       '埋蔵金の地図': 'na',
       '古典の詩集': 'na',
+      '夏模様の浮き輪': 'na',
       '禁断の愛～許されないからこそ美しく～': 'nb',
       'ゲームマガジン「ヒットガールズ」': 'nb',
       '跳躍探偵ウサギ～霧に包まれた温泉での滑落～': 'nb',
@@ -821,6 +822,7 @@ export const CHARACTER_LIST = [
       '『銃 可愛い 青春』': 'na',
       '跳躍探偵ウサギ～霧に包まれた温泉での滑落～': 'na',
       '古典の詩集': 'na',
+      '百科事典': 'na',
       '禁断の愛～許されないからこそ美しく～': 'nb',
       'ゲームマガジン「ヒットガールズ」': 'nb',
       'ザ・サプリメント': 'nb',
@@ -856,6 +858,7 @@ export const CHARACTER_LIST = [
       '古典の詩集': 'nb',
       '食虫植物の植木鉢': 'nb',
       '高級そうな欲望のつぼ': 'nb',
+      '百科事典': 'nb',
     } as Record<string, keyof typeof GIFT_EXP>
   },
   {
@@ -992,6 +995,7 @@ export const CHARACTER_LIST = [
       '跳躍探偵ウサギ～霧に包まれた温泉での滑落～': 'nb',
       'O-フィット': 'nb',
       '古典の詩集': 'nb',
+      '百科事典': 'nb',
     } as Record<string, keyof typeof GIFT_EXP>
   },
   {
@@ -1061,6 +1065,7 @@ export const CHARACTER_LIST = [
       'チェリーローズカラーのグロス': 'na',
       'お肌を透明にするBBクリーム': 'na',
       'ミリタリー用カモフラージュクリーム3種セット': 'na',
+      '夏模様の浮き輪': 'na',
       'MX-レーションC型デザート風味': 'nb',
     } as Record<string, keyof typeof GIFT_EXP>
   },
@@ -1134,6 +1139,8 @@ export const CHARACTER_LIST = [
       '世界で最も無駄な絡繰りボックス': 'nb',
       '古典の詩集': 'nb',
       '食虫植物の植木鉢': 'nb',
+      '高級そうな欲望のつぼ': 'nb',
+      '百科事典': 'nb',
     } as Record<string, keyof typeof GIFT_EXP>
   },
   {
@@ -1335,6 +1342,7 @@ export const CHARACTER_LIST = [
       'おしゃれなくし': 'ss',
       'レースの枕': 'sa',
       'サミュエラ「ザ・ビヨンド」': 'sa',
+      'エイ～ブックレア': 'sa',
       'エーポッドプロ': 'na',
       'お肌を透明にするBBクリーム': 'na',
       'ウェーブキャットの枕': 'nb',
@@ -1414,6 +1422,7 @@ export const CHARACTER_LIST = [
       '古典の詩集': 'nb',
       '食虫植物の植木鉢': 'nb',
       '高級そうな欲望のつぼ': 'nb',
+      '百科事典': 'nb',
     } as Record<string, keyof typeof GIFT_EXP>
   },
   {
@@ -2064,7 +2073,7 @@ export const CHARACTER_LIST = [
     giftRatings: {
       'おしゃれなくし': 'ss',
       'サミュエラ「ザ・ビヨンド」': 'sa',
-      'お肌を透明にするBBクリーム': 'na',
+      'お肌を透明にするBBクリーム': 'ns',
       '夏模様の浮き輪': 'na',
       'チェリーローズカラーのグロス': 'nb',
       'ミリタリー用カモフラージュクリーム3種セット': 'nb',
@@ -2089,6 +2098,25 @@ export const CHARACTER_LIST = [
       '食虫植物の植木鉢': 'na',
       'コスプレ用ぐるぐるメガネ': 'nb',
       '高級そうな欲望のつぼ': 'nb',
+    } as Record<string, keyof typeof GIFT_EXP>
+  },
+    {
+    id: 'ハルカ_ドレス',
+    name: 'ハルカ（ドレス）',
+    giftRatings: {
+      '最高級の楓の盆栽': 'ss',
+      'レトロな卵の工芸品': 'sa',
+      'ボードゲーム「ザ・人生」': 'sa',
+      '食虫植物の植木鉢': 'na',
+      '天体望遠鏡': 'nb',
+      '埋蔵金の地図': 'nb',
+      'コスプレ用ぐるぐるメガネ': 'nb',
+      '世界で最も無駄な絡繰りボックス': 'nb',
+      'リボンのついた熊のぬいぐるみ': 'nb',
+      '30色の絵の具セット': 'nb',
+      '頭脳開発キューブパズル': 'nb',
+      '高級そうな欲望のつぼ': 'nb',
+      'ぜんまい式オルゴール': 'nb',
     } as Record<string, keyof typeof GIFT_EXP>
   },
   {
@@ -2683,6 +2711,7 @@ export const CHARACTER_LIST = [
       '『銃 可愛い 青春』': 'nb',
       '跳躍探偵ウサギ～霧に包まれた温泉での滑落～': 'nb',
       '可愛い食器セット': 'nb',
+      '百科事典': 'nb',
     } as Record<string, keyof typeof GIFT_EXP>
   },
   {
@@ -2742,6 +2771,7 @@ export const CHARACTER_LIST = [
       '古典の詩集': 'nb',
       '高級そうな欲望のつぼ': 'nb',
       'ぜんまい式オルゴール': 'nb',
+      '百科事典': 'nb',
     } as Record<string, keyof typeof GIFT_EXP>
   },
   {
@@ -2749,7 +2779,7 @@ export const CHARACTER_LIST = [
     name: 'ムツキ',
     giftRatings: {
       'ボードゲーム「ザ・人生」': 'sa',
-      'コスプレ用ぐるぐるメガネ': 'na',
+      'コスプレ用ぐるぐるメガネ': 'ns',
       '天体望遠鏡': 'nb',
       'リボンのついた熊のぬいぐるみ': 'nb',
       '30色の絵の具セット': 'nb',
@@ -2763,6 +2793,20 @@ export const CHARACTER_LIST = [
     name: 'ムツキ（正月）',
     giftRatings: {
       'ボードゲーム「ザ・人生」': 'sa',
+      'コスプレ用ぐるぐるメガネ': 'na',
+      '天体望遠鏡': 'nb',
+      'リボンのついた熊のぬいぐるみ': 'nb',
+      '30色の絵の具セット': 'nb',
+      '頭脳開発キューブパズル': 'nb',
+      '食虫植物の植木鉢': 'nb',
+      '高級そうな欲望のつぼ': 'nb',
+    } as Record<string, keyof typeof GIFT_EXP>
+  },
+    {
+    id: 'ムツキ_ドレス',
+    name: 'ムツキ（ドレス）',
+    giftRatings: {
+      'ボードゲーム「ザ・人生」': 'ss',
       'コスプレ用ぐるぐるメガネ': 'na',
       '天体望遠鏡': 'nb',
       'リボンのついた熊のぬいぐるみ': 'nb',
@@ -2801,6 +2845,8 @@ export const CHARACTER_LIST = [
       'コスプレ用ぐるぐるメガネ': 'nb',
       'リボンのついた熊のぬいぐるみ': 'nb',
       '古典の詩集': 'nb',
+      '頭脳開発キューブパズル': 'nb',
+      '百科事典': 'nb',
     } as Record<string, keyof typeof GIFT_EXP>
   },
   {
@@ -2881,6 +2927,7 @@ export const CHARACTER_LIST = [
       '世界で最も無駄な絡繰りボックス': 'nb',
       '古典の詩集': 'nb',
       'ぜんまい式オルゴール': 'nb',
+      '百科事典': 'nb',
     } as Record<string, keyof typeof GIFT_EXP>
   },
   {
@@ -3016,6 +3063,7 @@ export const CHARACTER_LIST = [
       '世界で最も無駄な絡繰りボックス': 'nb',
       '大きなホールケーキ': 'nb',
       '高級そうな欲望のつぼ': 'nb',
+      '百科事典': 'nb',
     } as Record<string, keyof typeof GIFT_EXP>
   },
   {
@@ -3110,6 +3158,14 @@ export const CHARACTER_LIST = [
       'MX-レーションC型デザート風味': 'nb',
       '抹茶味の瓶ラムネ': 'nb',
       '跳躍探偵ウサギ～霧に包まれた温泉での滑落～': 'nb',
+      'O-フィット': 'nb',
+      'コスプレ用ぐるぐるメガネ': 'nb',
+      'リボンのついた熊のぬいぐるみ': 'nb',
+      '30色の絵の具セット': 'nb',
+      '古典の詩集': 'nb',
+      '頭脳開発キューブパズル': 'nb',
+      '大きなホールケーキ': 'nb',
+      '百科事典': 'nb',
     } as Record<string, keyof typeof GIFT_EXP>
   },
   {
