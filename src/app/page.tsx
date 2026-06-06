@@ -10,6 +10,7 @@ import HistoryCalendar from "@/components/HistoryCalendar";
 import BondDashboard from "@/components/BondDashboard";
 import Settings from "@/components/Settings";
 import SidePanel from "@/components/SidePanel";
+import NewFeatureDialog from "@/components/NewFeatureDialog";
 import { CALENDAR_LIMITS } from "@/lib/timeUtils";
 import { OVERLAY_CONTENTS } from "@/components/pages";
 
@@ -273,6 +274,7 @@ export default function Home() {
     <div className="bg-background h-screen flex flex-col">
       <OneSignalInit />
       <Header isLoggedIn={!!session} onMenuClick={() => setIsSidePanelOpen(true)} />
+      <NewFeatureDialog />
       
       {overlayKey && <Overlay contentKey={overlayKey} onClose={() => setOverlayKey(null)} />}
 
