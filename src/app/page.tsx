@@ -7,12 +7,14 @@ import Header from "@/components/Header";
 import TimerDashboard from "@/components/TimerDashboard";
 import BottomNavBar from "@/components/BottomNavBar";
 import HistoryCalendar from "@/components/HistoryCalendar";
+import BondDashboard from "@/components/BondDashboard";
 import Settings from "@/components/Settings";
 import SidePanel from "@/components/SidePanel";
+import NewFeatureDialog from "@/components/NewFeatureDialog";
 import { CALENDAR_LIMITS } from "@/lib/timeUtils";
 import { OVERLAY_CONTENTS } from "@/components/pages";
 
-type Tab = 'timer' | 'history';
+type Tab = 'timer' | 'history' | 'bond';
 
 const Overlay = ({ contentKey, onClose }: { contentKey: string; onClose: () => void }) => {
   const content = OVERLAY_CONTENTS[contentKey];
@@ -45,13 +47,30 @@ const Overlay = ({ contentKey, onClose }: { contentKey: string; onClose: () => v
 };
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<Tab>('timer');
+  const [activeTab, setActiveTab] = useState<Tab>(() => {
+    if (typeof window !== 'undefined') {
+      const savedTab = localStorage.getItem('last_active_tab') as Tab | null;
+      const savedTimeStr = localStorage.getItem('last_active_tab_time');
+      if (savedTab === 'timer' || savedTab === 'history' || savedTab === 'bond') {
+        if (savedTimeStr) {
+          const savedTime = parseInt(savedTimeStr, 10);
+          const now = Date.now();
+          const TEN_MINUTES = 10 * 60 * 1000;
+          if (now - savedTime < TEN_MINUTES) {
+            return savedTab;
+          }
+        }
+      }
+    }
+    return 'timer';
+  });
   const [session, setSession] = useState<any>(null);
   const [timerHistory, setTimerHistory] = useState<number[]>([]);
   const [calendarHistory, setCalendarHistory] = useState<number[]>([]);
   const [calendarDate, setCalendarDate] = useState(() => new Date());
   const [ticket1Time, setTicket1Time] = useState<Date | null>(null);
   const [ticket2Time, setTicket2Time] = useState<Date | null>(null);
+  const [relationshipHistory, setRelationshipHistory] = useState<any[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
@@ -59,6 +78,49 @@ export default function Home() {
   const [overlayKey, setOverlayKey] = useState<string | null>(null);
 
   const isInitialFetched = useRef(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && activeTab) {
+      localStorage.setItem('last_active_tab', activeTab);
+      localStorage.setItem('last_active_tab_time', Date.now().toString());
+    }
+  }, [activeTab]);
+
+  const fetchRelationshipHistory = useCallback(async () => {
+    const { data: { session: s } } = await supabase.auth.getSession();
+    if (!s) return;
+    try {
+      const res = await fetch('/api/relationship', {
+        headers: { 'Authorization': `Bearer ${s.access_token}` }
+      });
+      const data = await res.json();
+      setRelationshipHistory(Array.isArray(data) ? data : []);
+    } catch (e) { console.error(e); }
+  }, []);
+
+  const handleSaveRelationship = async (level: number, date: string, charKey: string) => {
+    if (!session || isSyncing) return;
+    setIsSyncing(true);
+    try {
+      const res = await fetch('/api/relationship', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ char_key: charKey, bond_level: level, recorded_at: date })
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        alert(errorData.error || "登録に失敗しました。");
+        return;
+      }
+
+      await fetchRelationshipHistory();
+    } catch (e) {
+      console.error(e);
+    } finally { 
+      setIsSyncing(false); 
+    }
+  };
 
   const fetchMonthlyData = useCallback(async (year: number, month: number) => {
     const { data: { session: s } } = await supabase.auth.getSession();
@@ -102,7 +164,8 @@ export default function Home() {
       setCalendarDate(new Date(year, month - 1, 1));
       const [profileRes, monthlyData] = await Promise.all([
         supabase.from('profiles').select('ticket1_time, ticket2_time').eq('id', s.user.id).single(),
-        fetchMonthlyData(year, month)
+        fetchMonthlyData(year, month),
+        fetchRelationshipHistory()
       ]);
       if (profileRes.data) {
         if (profileRes.data.ticket1_time) setTicket1Time(new Date(profileRes.data.ticket1_time));
@@ -112,7 +175,7 @@ export default function Home() {
       setTimerHistory(monthlyData);
       setIsDataLoaded(true);
     } finally { setIsAuthChecking(false); }
-  }, [fetchMonthlyData]);
+  }, [fetchMonthlyData, fetchRelationshipHistory]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session: s } }) => {
@@ -211,11 +274,14 @@ export default function Home() {
     <div className="bg-background h-screen flex flex-col">
       <OneSignalInit />
       <Header isLoggedIn={!!session} onMenuClick={() => setIsSidePanelOpen(true)} />
+      <NewFeatureDialog />
       
       {overlayKey && <Overlay contentKey={overlayKey} onClose={() => setOverlayKey(null)} />}
 
-      <main className="flex-1 flex flex-col pt-16 pb-16 min-[1000px]:pb-0">
-        <div className="min-[1000px]:hidden flex-1">
+      <main className="flex-1 flex flex-col pt-16 pb-16">
+        
+        {/* スマホ表示 (幅1000px未満) */}
+        <div className="min-[1000px]:hidden flex-1 overflow-y-auto">
           {activeTab === 'timer' && (
             <TimerDashboard tapHistory={timerHistory} lastTapTime={lastTapTime} ticket1Time={ticket1Time} ticket2Time={ticket2Time} onTap={handleTap} onInvite={handleInvite} isSyncing={isSyncing} isDataLoaded={isDataLoaded} />
           )}
@@ -224,14 +290,33 @@ export default function Home() {
               <HistoryCalendar tapHistory={calendarHistory} currentDate={calendarDate} onMonthChange={handleMonthChange} />
             </div>
           )}
+          {activeTab === 'bond' && (
+            <BondDashboard bondHistory={relationshipHistory} onSave={handleSaveRelationship} isSyncing={isSyncing} />
+          )}
         </div>
-        <div className="hidden min-[1000px]:flex flex-1 items-center justify-center p-6 h-[calc(100vh-64px)] overflow-hidden">
-          <div className="grid grid-cols-2 gap-6 w-full max-w-[160svh] items-stretch mx-auto">
-            <TimerDashboard tapHistory={timerHistory} lastTapTime={lastTapTime} ticket1Time={ticket1Time} ticket2Time={ticket2Time} onTap={handleTap} onInvite={handleInvite} isSyncing={isSyncing} isDataLoaded={isDataLoaded} />
-            <HistoryCalendar tapHistory={calendarHistory} currentDate={calendarDate} onMonthChange={handleMonthChange} />
+
+        {/* PC表示 (幅1000px以上) */}
+        <div className="hidden min-[1000px]:flex flex-1 justify-center px-4 py-4 h-[calc(100vh-120px)] overflow-hidden">
+          <div className="w-full h-full mx-auto flex items-stretch">
+            
+            {(activeTab === 'timer' || activeTab === 'history') && (
+              <div className="grid grid-cols-2 gap-8 w-full h-full items-stretch animate-in fade-in duration-200">
+                <TimerDashboard tapHistory={timerHistory} lastTapTime={lastTapTime} ticket1Time={ticket1Time} ticket2Time={ticket2Time} onTap={handleTap} onInvite={handleInvite} isSyncing={isSyncing} isDataLoaded={isDataLoaded} />
+                <HistoryCalendar tapHistory={calendarHistory} currentDate={calendarDate} onMonthChange={handleMonthChange} />
+              </div>
+            )}
+
+            {activeTab === 'bond' && (
+              <div className="w-full h-full overflow-y-auto animate-in fade-in">
+                <BondDashboard bondHistory={relationshipHistory} onSave={handleSaveRelationship} isSyncing={isSyncing} />
+              </div>
+            )}
+
           </div>
         </div>
+
         <BottomNavBar activeTab={activeTab} setActiveTab={setActiveTab} />
+        
         <SidePanel isOpen={isSidePanelOpen} onClose={() => setIsSidePanelOpen(false)}>
           <Settings onOpenContent={(key) => { setOverlayKey(key); setIsSidePanelOpen(false); }} />
         </SidePanel>
