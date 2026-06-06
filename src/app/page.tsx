@@ -53,7 +53,7 @@ export default function Home() {
   const [calendarDate, setCalendarDate] = useState(() => new Date());
   const [ticket1Time, setTicket1Time] = useState<Date | null>(null);
   const [ticket2Time, setTicket2Time] = useState<Date | null>(null);
-  const [bondHistory, setBondHistory] = useState<any[]>([]);
+  const [relationshipHistory, setRelationshipHistory] = useState<any[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
@@ -62,28 +62,28 @@ export default function Home() {
 
   const isInitialFetched = useRef(false);
 
-  const fetchBondHistory = useCallback(async () => {
+  const fetchRelationshipHistory = useCallback(async () => {
     const { data: { session: s } } = await supabase.auth.getSession();
     if (!s) return;
     try {
-      const res = await fetch('/api/bond', {
+      const res = await fetch('/api/relationship', {
         headers: { 'Authorization': `Bearer ${s.access_token}` }
       });
       const data = await res.json();
-      setBondHistory(Array.isArray(data) ? data : []);
+      setRelationshipHistory(Array.isArray(data) ? data : []);
     } catch (e) { console.error(e); }
   }, []);
 
-  const handleSaveBond = async (level: number, date: string, charKey: string) => {
+  const handleSaveRelationship = async (level: number, date: string, charKey: string) => {
     if (!session || isSyncing) return;
     setIsSyncing(true);
     try {
-      await fetch('/api/bond', {
+      await fetch('/api/relationship', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify({ char_key: charKey, bond_level: level, recorded_at: date })
       });
-      await fetchBondHistory();
+      await fetchRelationshipHistory();
     } finally { setIsSyncing(false); }
   };
 
@@ -129,7 +129,8 @@ export default function Home() {
       setCalendarDate(new Date(year, month - 1, 1));
       const [profileRes, monthlyData] = await Promise.all([
         supabase.from('profiles').select('ticket1_time, ticket2_time').eq('id', s.user.id).single(),
-        fetchMonthlyData(year, month)
+        fetchMonthlyData(year, month),
+        fetchRelationshipHistory()
       ]);
       if (profileRes.data) {
         if (profileRes.data.ticket1_time) setTicket1Time(new Date(profileRes.data.ticket1_time));
@@ -139,7 +140,7 @@ export default function Home() {
       setTimerHistory(monthlyData);
       setIsDataLoaded(true);
     } finally { setIsAuthChecking(false); }
-  }, [fetchMonthlyData]);
+  }, [fetchMonthlyData, fetchRelationshipHistory]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session: s } }) => {
@@ -243,9 +244,7 @@ export default function Home() {
 
       <main className="flex-1 flex flex-col pt-16 pb-16">
         
-        {/* ==========================================
-            スマホ表示 (幅1000px未満): 3画面完全個別切替
-           ========================================== */}
+        {/* スマホ表示 (幅1000px未満) */}
         <div className="min-[1000px]:hidden flex-1 overflow-y-auto">
           {activeTab === 'timer' && (
             <TimerDashboard tapHistory={timerHistory} lastTapTime={lastTapTime} ticket1Time={ticket1Time} ticket2Time={ticket2Time} onTap={handleTap} onInvite={handleInvite} isSyncing={isSyncing} isDataLoaded={isDataLoaded} />
@@ -256,17 +255,14 @@ export default function Home() {
             </div>
           )}
           {activeTab === 'bond' && (
-            <BondDashboard bondHistory={bondHistory} onSave={handleSaveBond} />
+            <BondDashboard bondHistory={relationshipHistory} onSave={handleSaveRelationship} isSyncing={isSyncing} />
           )}
         </div>
 
-        {/* ==========================================
-            PC表示 (幅1000px以上): 2画面フルスクリーン切替
-           ========================================== */}
+        {/* PC表示 (幅1000px以上) */}
         <div className="hidden min-[1000px]:flex flex-1 justify-center px-4 py-4 h-[calc(100vh-120px)] overflow-hidden">
           <div className="w-full h-full mx-auto flex items-stretch">
             
-            {/* パネル1: タイマー＆カレンダー同時展開 (左右均等に画面いっぱいへ引き伸ばす) */}
             {(activeTab === 'timer' || activeTab === 'history') && (
               <div className="grid grid-cols-2 gap-8 w-full h-full items-stretch animate-in fade-in duration-200">
                 <TimerDashboard tapHistory={timerHistory} lastTapTime={lastTapTime} ticket1Time={ticket1Time} ticket2Time={ticket2Time} onTap={handleTap} onInvite={handleInvite} isSyncing={isSyncing} isDataLoaded={isDataLoaded} />
@@ -274,10 +270,9 @@ export default function Home() {
               </div>
             )}
 
-            {/* パネル2: 贈り物単独画面 (幅制限をなくし、画面いっぱいに表示) */}
             {activeTab === 'bond' && (
               <div className="w-full h-full overflow-y-auto animate-in fade-in">
-                <BondDashboard bondHistory={bondHistory} onSave={handleSaveBond} />
+                <BondDashboard bondHistory={relationshipHistory} onSave={handleSaveRelationship} isSyncing={isSyncing} />
               </div>
             )}
 
