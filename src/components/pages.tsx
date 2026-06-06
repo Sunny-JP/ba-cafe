@@ -281,7 +281,7 @@ export const OVERLAY_CONTENTS: Record<string, { title: string; body: React.React
     ),
   },
   operator: {
-    title: "運営者情報・変更履歴",
+    title: "運営者情報など",
     body: (() => {
       const updateLogs = [
         { date: '2026-06-07', content: '絆ランク記録機能追加' },
@@ -304,9 +304,14 @@ export const OVERLAY_CONTENTS: Record<string, { title: string; body: React.React
                 ハチか<span className="ml-2 mr-1">X:</span><a href="https://x.com/bite_sour_sweet" target="_blank" rel="noopener noreferrer" className="hover:underline text-blue-400">@bite_sour_sweet</a>
               </p>
             </div>
+            <div className="flex flex-col gap-2">
+              <h3 className="font-bold text-foreground border-b border-muted pb-1">謝辞</h3>
+              <p className="font-normal">
+                ブルーアーカイブ（ブルアカ）攻略 Wiki 様（絆ランクテーブル・生徒さんごとの贈り物対応付けに使用）<span className="ml-2 mr-1">HP:</span><a href="https://bluearchive.wikiru.jp/" target="_blank" rel="noopener noreferrer" className="hover:underline text-blue-400">https://bluearchive.wikiru.jp/</a>
+              </p>
+            </div>
           </div>
-
-          <div className="flex flex-col gap-1 pb-2">
+          <div className="flex flex-col gap-2">
             <h3 className="font-bold text-foreground border-b border-muted pb-1">変更履歴</h3>
             <div className="bg-background/50 rounded-md p-1.5 max-h-48 overflow-y-auto space-y-2 text-sm">
               {updateLogs.map((log, index) => (
@@ -317,11 +322,10 @@ export const OVERLAY_CONTENTS: Record<string, { title: string; body: React.React
               ))}
             </div>
           </div>
-
           <div className="flex flex-col gap-2">
             <h3 className="font-bold text-foreground border-b border-muted pb-1">連絡先・フィードバック</h3>
             <p className="text-sm leading-relaxed">
-              不具合報告やご要望は、 
+              不具合・ミスのご報告やご要望は、 
               <a href="https://github.com/Sunny-JP/ba-cafe" target="_blank" rel="noopener noreferrer" className="mx-1 hover:underline text-blue-400">
                 GitHub
               </a> 

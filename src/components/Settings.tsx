@@ -40,7 +40,7 @@ const Settings = ({ onOpenContent }: SettingsProps) => {
     { label: 'FAQ', key: 'faq' },
     { label: '利用規約', key: 'terms' },
     { label: 'プライバシーポリシー', key: 'privacy' },
-    { label: '運営者情報・変更履歴', key: 'operator' },
+    { label: '運営者情報など', key: 'operator' },
   ];
 
   const handleNotificationClick = async () => {
