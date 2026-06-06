@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useLayoutEffect } from 'react';
 import { 
   XAxis, YAxis, CartesianGrid, 
-  ResponsiveContainer, AreaChart, Area, Tooltip
+  ResponsiveContainer, AreaChart, Area, Tooltip, Line
 } from 'recharts';
 import { format } from 'date-fns';
 import { 
@@ -13,10 +13,13 @@ import {
 } from '@/lib/bondData';
 
 interface BondRecord {
+  id: string; 
   char_key: string;
   bond_level: number;
   recorded_at: string;
 }
+
+const MIN_CHART_DIMENSION = 32;
 
 const getLevelFromExp = (exp: number): number => {
   let currentLevel = 1;
@@ -30,9 +33,9 @@ const getLevelFromExp = (exp: number): number => {
   return currentLevel;
 };
 
-const PencilIcon = () => (
+const TrashIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
   </svg>
 );
 
@@ -47,6 +50,10 @@ export default function BondDashboard({
 }) {
   const [selectedCharId, setSelectedCharId] = useState<CharacterId>(CHARACTER_LIST[0].id);
   const [isMounted, setIsMounted] = useState(false);
+  
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [isChartReady, setIsChartReady] = useState(false);
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedCharId = localStorage.getItem('last_selected_char_id') as CharacterId | null;
@@ -56,12 +63,32 @@ export default function BondDashboard({
       setIsMounted(true);
     }
   }, []);
+
+  useLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const update = (rect = el.getBoundingClientRect()) => {
+      if (rect.width >= MIN_CHART_DIMENSION && rect.height >= MIN_CHART_DIMENSION) {
+        setIsChartReady(true);
+      }
+    };
+
+    update();
+    if (typeof ResizeObserver === "undefined") return;
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.target === el) update(entry.contentRect);
+      }
+    });
+    observer.observe(el);
+    
+    return () => observer.disconnect();
+  }, []);
+
   const [inputLevel, setInputLevel] = useState(1);
   const [inputDate, setInputDate] = useState(format(new Date(), 'yyyy-MM-dd'));
-  
-  const [editingRecord, setEditingRecord] = useState<BondRecord | null>(null);
-  const [editLevel, setEditLevel] = useState(1);
-  const [editDate, setEditDate] = useState('');
 
   const [isSelectOpen, setIsSelectOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
@@ -102,19 +129,105 @@ export default function BondDashboard({
     return rows;
   }, [filteredHistory]);
 
-  const graphData = useMemo(() => {
-    if (filteredHistory.length > 0) {
-      return [...filteredHistory]
-        .reverse()
-        .map(h => ({
-          recorded_at: h.recorded_at,
-          timestamp: new Date(h.recorded_at).getTime(),
-          cumulative_exp: BOND_EXP_TABLE[h.bond_level] || 0,
-          bond_level: h.bond_level
-        }));
+  const chartDataCombined = useMemo(() => {
+    if (filteredHistory.length === 0) return { data: [], hasPrediction: false };
+
+    const actualPoints = [...filteredHistory]
+      .reverse()
+      .map(h => ({
+        recorded_at: h.recorded_at,
+        timestamp: new Date(h.recorded_at).getTime(),
+        cumulative_exp: BOND_EXP_TABLE[h.bond_level] || 0,
+        bond_level: h.bond_level,
+        isPrediction: false,
+        actual_exp: BOND_EXP_TABLE[h.bond_level] || 0,
+        predicted_exp: null as number | null,
+      }));
+
+    const lastActual = actualPoints[actualPoints.length - 1];
+    const targetExp = 240225;
+
+    if (lastActual.cumulative_exp >= targetExp || actualPoints.length < 2) {
+      return { data: actualPoints, hasPrediction: false, xDomain: ['dataMin', 'dataMax'] as const };
     }
-    return [];
+
+    const n = actualPoints.length;
+    let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+    for (const p of actualPoints) {
+      sumX += p.timestamp;
+      sumY += p.cumulative_exp;
+      sumXY += p.timestamp * p.cumulative_exp;
+      sumXX += p.timestamp * p.timestamp;
+    }
+
+    const denominator = n * sumXX - sumX * sumX;
+    if (denominator === 0) {
+      return { data: actualPoints, hasPrediction: false, xDomain: ['dataMin', 'dataMax'] as const };
+    }
+
+    const slope = (n * sumXY - sumX * sumY) / denominator;
+    const intercept = (sumY - slope * sumX) / n;
+
+    if (slope <= 0) {
+      return { data: actualPoints, hasPrediction: false, xDomain: ['dataMin', 'dataMax'] as const };
+    }
+
+    const predictionPoints: any[] = [];
+    
+    predictionPoints.push({
+      recorded_at: lastActual.recorded_at,
+      timestamp: lastActual.timestamp,
+      cumulative_exp: lastActual.cumulative_exp,
+      bond_level: lastActual.bond_level,
+      isPrediction: true,
+      actual_exp: null,
+      predicted_exp: lastActual.cumulative_exp
+    });
+
+    let nextTargetLevel = Math.floor((lastActual.bond_level / 5) + 1) * 5;
+    if (nextTargetLevel === lastActual.bond_level) {
+      nextTargetLevel += 5;
+    }
+
+    for (let lv = nextTargetLevel; lv <= 100; lv += 5) {
+      const expAtLv = BOND_EXP_TABLE[lv];
+      if (expAtLv === undefined) continue;
+
+      const ts = Math.round((expAtLv - intercept) / slope);
+      
+      predictionPoints.push({
+        recorded_at: format(new Date(ts), 'yyyy-MM-dd'),
+        timestamp: ts,
+        cumulative_exp: expAtLv,
+        bond_level: lv,
+        isPrediction: true,
+        actual_exp: null,
+        predicted_exp: expAtLv
+      });
+    }
+
+    const finalPoint = predictionPoints[predictionPoints.length - 1];
+    if (!finalPoint || finalPoint.bond_level !== 100) {
+      const ts100 = Math.round((targetExp - intercept) / slope);
+      predictionPoints.push({
+        recorded_at: format(new Date(ts100), 'yyyy-MM-dd'),
+        timestamp: ts100,
+        cumulative_exp: targetExp,
+        bond_level: 100,
+        isPrediction: true,
+        actual_exp: null,
+        predicted_exp: targetExp
+      });
+    }
+
+    return {
+      data: [...actualPoints, ...predictionPoints.slice(0)],
+      hasPrediction: true,
+      xDomain: [actualPoints[0].timestamp, predictionPoints[predictionPoints.length - 1].timestamp] as const
+    };
   }, [filteredHistory]);
+
+  const graphData = chartDataCombined.data;
 
   useEffect(() => {
     if (!isMounted) return;
@@ -152,97 +265,150 @@ export default function BondDashboard({
     await onSave(inputLevel, inputDate, selectedCharId);
   };
 
-  const handleOpenEditDialog = (record: BondRecord) => {
-    setEditingRecord(record);
-    setEditLevel(record.bond_level);
-    setEditDate(record.recorded_at);
-  };
+  const handleDelete = async (recordId: string) => {
+    if (!window.confirm("この記録を削除してもよろしいですか？")) return;
 
-  const handleSaveEdit = async () => {
-    if (!editingRecord) return;
-    await onSave(editLevel, editDate, selectedCharId);
-    setEditingRecord(null);
+    try {
+      let token = '';
+      if (typeof window !== 'undefined') {
+        const authKey = Object.keys(localStorage).find(key => key.startsWith('sb-') && key.endsWith('-auth-token'));
+        if (authKey) {
+          const authDataString = localStorage.getItem(authKey);
+          if (authDataString) {
+            const authData = JSON.parse(authDataString);
+            token = authData?.access_token || '';
+          }
+        }
+      }
+
+      const res = await fetch('/api/relationship', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ id: recordId }),
+      });
+
+      if (!res.ok) throw new Error('Failed to delete');
+
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      alert("削除に失敗しました。");
+    }
   };
 
   const renderGraph = (
-    <div className="graph-container">
-      {graphData.length > 0 ? (
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={graphData} margin={{ top: 5, right: 5, left: -20, bottom: -10 }}>
-            <defs>
-              <linearGradient id="colorExp" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.4}/>
-                <stop offset="60%" stopColor="var(--primary)" stopOpacity={0.2}/>
-                <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--secondary)" opacity={0.2} />
-            <XAxis 
-              dataKey="timestamp" 
-              type="number"
-              domain={['dataMin', 'dataMax']}
-              tickLine={false}
-              axisLine={false}
-              stroke="var(--secondary-foreground)"
-              fontSize={9}
-              tickCount={4}
-              tickFormatter={(ts) => {
-                try {
-                  const d = new Date(ts);
-                  const y = d.getFullYear();
-                  const m = String(d.getMonth() + 1).padStart(2, '0');
-                  return `${y}/${m}`;
-                } catch (e) {}
-                return '';
-              }}
-            />
-            <YAxis 
-              dataKey="cumulative_exp" 
-              domain={[0, 240225]} 
-              ticks={[0, 14790, 29175, 50835, 81270, 121980, 174465, 240225]}
-              tickFormatter={(exp) => `Lv.${getLevelFromExp(exp)}`}
-              stroke="var(--secondary-foreground)"
-              fontSize={10}
-              tickLine={false}
-              axisLine={false}
-            />
-            <Tooltip 
-              labelFormatter={(_, payload) => {
-                if (payload && payload[0]) {
-                  return `Date: ${payload[0].payload.recorded_at}`;
-                }
-                return '';
-              }}
-              formatter={(value: any, name: any, props: any) => [
-                `RANK ${props.payload.bond_level} (${value} exp)`
-              ]}
-              contentStyle={{
-                background: 'var(--card)',
-                border: '1px solid var(--muted)',
-                borderRadius: '0.5rem',
-                fontSize: '0.85rem',
-              }}
-              labelStyle={{
-                color: 'var(--foreground)',
-                fontWeight: 700
-              }}
-            />
-            <Area 
-              type="monotone"
-              dataKey="cumulative_exp" 
-              stroke="var(--primary)" 
-              strokeWidth={3} 
-              fillOpacity={1} 
-              fill="url(#colorExp)" 
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      ) : (
-        <div className="flex h-full w-full items-center justify-center border border-dashed border-(--muted) rounded-2xl bg-(--card)/30">
-          <span className="text-lg font-bold text-(--muted-foreground) tracking-wider opacity-60">
-            No Data
-          </span>
-        </div>
+    <div 
+      ref={containerRef}
+      className={`graph-container ${!isChartReady ? 'opacity-0 pointer-events-none' : ''}`}
+      data-chart-ready={isChartReady ? "true" : "false"}
+    >
+      {isChartReady && (
+        graphData.length > 0 ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={graphData} margin={{ top: 5, right: 5, left: -35, bottom: -10 }}>
+              <defs>
+                <linearGradient id="colorExp" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.4}/>
+                  <stop offset="60%" stopColor="var(--primary)" stopOpacity={0.2}/>
+                  <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--secondary)" opacity={0.2} />
+              <XAxis 
+                dataKey="timestamp" 
+                type="number"
+                domain={chartDataCombined.xDomain || ['dataMin', 'dataMax']}
+                tickLine={true}
+                axisLine={true}
+                stroke="var(--secondary-foreground)"
+                fontSize={10}
+                tickCount={14}
+                tickFormatter={(ts) => {
+                  try {
+                    const d = new Date(ts);
+                    const y = d.getFullYear();
+                    const m = String(d.getMonth() + 1).padStart(2, '0');
+                    return `${y}/${m}`;
+                  } catch (e) {}
+                  return '';
+                }}
+              />
+              <YAxis 
+                dataKey="cumulative_exp" 
+                domain={[0, 240225]} 
+                ticks={[0, 14790, 29175, 50835, 81270, 121980, 174465, 240225]}
+                tickFormatter={(exp) => `${getLevelFromExp(exp)}`}
+                stroke="var(--secondary-foreground)"
+                fontSize={10}
+                tickLine={true}
+                axisLine={true}
+              />
+              <Tooltip 
+                labelFormatter={(_, payload) => {
+                  if (payload && payload[0]) {
+                    const p = payload[0].payload;
+                    return p.isPrediction ? `Estimated Date: ${p.recorded_at}` : `Date: ${p.recorded_at}`;
+                  }
+                  return '';
+                }}
+                formatter={(value: any, name: any, props: any) => {
+                  const p = props.payload;
+
+                  if (p.isPrediction) {
+                    if (name === 'predicted_exp') {
+                      return [`RANK ${p.bond_level} (Est. Target)`];
+                    }
+                    return null as any;
+                  }
+
+                  if (name === 'actual_exp') {
+                    return [`RANK ${p.bond_level} (${p.actual_exp} exp)`];
+                  }
+
+                  return null as any; 
+                }}
+                contentStyle={{
+                  background: 'var(--card)',
+                  border: '1px solid var(--muted)',
+                  borderRadius: '0.5rem',
+                  fontSize: '0.85rem',
+                }}
+                labelStyle={{
+                  color: 'var(--foreground)',
+                  fontWeight: 700
+                }}
+              />
+              <Area 
+                type="monotone"
+                dataKey="actual_exp" 
+                stroke="var(--primary)" 
+                strokeWidth={3} 
+                fillOpacity={1} 
+                fill="url(#colorExp)" 
+                connectNulls={false}
+              />
+              <Line
+                type="monotone"
+                dataKey="predicted_exp"
+                stroke="var(--primary)"
+                strokeWidth={2}
+                strokeDasharray="5 5"
+                dot={false}
+                activeDot={false}
+                connectNulls={true}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="flex h-full w-full items-center justify-center border border-dashed border-(--muted) rounded-2xl bg-(--card)/30">
+            <span className="text-lg font-bold text-(--muted-foreground) tracking-wider opacity-60">
+              No Data
+            </span>
+          </div>
+        )
       )}
     </div>
   );
@@ -250,11 +416,7 @@ export default function BondDashboard({
   return (
     <div className="bond-container">
       <div className="bond-split-layout">
-        
-        {/* 左側パネル */}
         <div className="bond-left-panel">
-          
-          {/* 1. キャラクター生徒選択 */}
           <div className="char-selector" ref={dropdownRef}>
             <button 
               className="char-selector-trigger"
@@ -289,13 +451,11 @@ export default function BondDashboard({
             )}
           </div>
 
-          {/* 2. ランク・日付記録入力 */}
           <div className="record-input-area">
             <div className="input-group-container">
               <div className="input-field-wrapper">
                 <label className="input-label">Rank</label>
                 <div className="input-content">
-                  {/* <span className="rank-prefix">LV.</span> */}
                   <span className="rank-value">{inputLevel}</span>
                   <div className="spin-buttons-box">
                     <button 
@@ -337,7 +497,6 @@ export default function BondDashboard({
             </button>
           </div>
 
-          {/* 3. 贈り物画像 */}
           <div className="section-wrapper">
             <h3 className="gift-title">Favorite Gifts</h3>
             <div className="gift-scroll-container scrollbar-hide">
@@ -367,14 +526,13 @@ export default function BondDashboard({
             </div>
           </div>
 
-          {/* 4. 絆上げ履歴 */}
           <div className="section-wrapper">
             <h3 className="section-toggle-btn" style={{ cursor: 'default' }}>
               <span>History Log</span>
             </h3>
             <div className="history-grid-container">
               {displayHistoryRows.map((record, index) => (
-                <div key={record ? record.recorded_at : `empty-${index}`} className="history-item">
+                <div key={record ? record.id : `empty-${index}`} className="history-item">
                   <div className="history-log-row">
                     {record ? (
                       <>
@@ -401,11 +559,11 @@ export default function BondDashboard({
                   
                   {record ? (
                     <button 
-                      onClick={() => handleOpenEditDialog(record)} 
-                      className="edit-icon-btn"
-                      aria-label="Edit record"
+                      onClick={() => handleDelete(record.id)} 
+                      className="edit-icon-btn text-rose-500 hover:text-rose-700 hover:bg-rose-500/10"
+                      aria-label="Delete record"
                     >
-                      <PencilIcon />
+                      <TrashIcon />
                     </button>
                   ) : (
                     <span className="edit-btn-placeholder" />
@@ -415,7 +573,6 @@ export default function BondDashboard({
             </div>
           </div>
 
-          {/* 5. Progress Graph */}
           {!isDesktop && (
             <div className="section-wrapper">
               <h3 className="section-toggle-btn" style={{ cursor: 'default' }}>
@@ -426,91 +583,31 @@ export default function BondDashboard({
               </div>
             </div>
           )}
-
         </div>
-
-        {/* PC表示時の Progress Graph */}
         {isDesktop && (
           <div className="bond-right-panel animate-in fade-in duration-300">
             <h3 className="section-toggle-btn" style={{ cursor: 'default' }}>Progress Graph</h3>
             {renderGraph}
           </div>
         )}
-
       </div>
-
-      {/* 編集ダイアログポップアップ */}
-      {editingRecord && (
-        <div className="fixed inset-0 bg-(--background) z-100 flex justify-center items-start p-6 animate-in fade-in duration-200">
-          <div className="w-full max-w-md mt-12 rounded-2xl shadow-xl border bg-(--card) flex flex-col overflow-hidden border-dashed">
-            
-            <div className="border-b border-dashed flex justify-between items-center z-20">
-              <h1 className="text-xl px-6 py-4 font-bold truncate">
-                Edit Record
-              </h1>
-              <button 
-                onClick={() => setEditingRecord(null)}
-                className="btn-close px-6 py-4 cursor-pointer"
-                aria-label="Close"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="p-6 flex flex-col gap-6">
-              <div>
-                <span className="text-sm text-(--secondary-foreground) font-bold block mb-1">Student</span>
-                <span className="text-lg font-black">{selectedChar.name}</span>
-              </div>
-
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <label className="text-sm text-(--secondary-foreground) font-bold block mb-1">Rank</label>
-                  <div className="flex items-center bg-(--background) px-3 py-2 rounded-xl border border-dashed h-14">
-                    <span className="font-black text-sm mr-1 opacity-60">LV.</span>
-                    <span className="font-black text-xl flex-1">{editLevel}</span>
-                    <div className="flex flex-col gap-0.5">
-                      <button 
-                        onClick={() => setEditLevel(prev => Math.min(100, prev + 1))}
-                        className="text-xs px-1 hover:text-(--primary)"
-                      >
-                        ▲
-                      </button>
-                      <button 
-                        onClick={() => setEditLevel(prev => Math.max(1, prev - 1))}
-                        className="text-xs px-1 hover:text-(--primary)"
-                      >
-                        ▼
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex-1">
-                  <label className="text-sm text-(--secondary-foreground) font-bold block mb-1">Date</label>
-                  <input 
-                    type="date" 
-                    value={editDate} 
-                    onChange={(e) => setEditDate(e.target.value)} 
-                    className="w-full font-bold bg-(--background) px-3 py-2 rounded-xl border border-dashed outline-none h-14 text-xl"
-                    style={{ colorScheme: 'var(--system-color-scheme)' }}
-                  />
-                </div>
-              </div>
-
-              <button
-                onClick={handleSaveEdit}
-                disabled={isSyncing}
-                className="btn-bond-record-dialog"
-              >
-                {isSyncing ? "Updating..." : "Save Changes"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
+}
+
+if (typeof window !== "undefined") {
+  const filterWarning = (args: any[], originalFn: (...args: any[]) => void) => {
+    if (
+      typeof args[0] === "string" &&
+      args[0].includes("should be greater than 0")
+    ) {
+      return;
+    }
+    originalFn(...args);
+  };
+
+  const originalConsoleError = console.error;
+  console.error = (...args: any[]) => filterWarning(args, originalConsoleError);
+  const originalConsoleWarn = console.warn;
+  console.warn = (...args: any[]) => filterWarning(args, originalConsoleWarn);
 }

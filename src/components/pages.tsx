@@ -17,6 +17,7 @@ export const OVERLAY_CONTENTS: Record<string, { title: string; body: React.React
           <li>生徒さんの訪問タイミング（4:00/16:00 JST）のカウントダウン</li>
           <li>招待券のクールタイム管理</li>
           <li>タップ履歴のカレンダー表示</li>
+          <li>絆上げの記録とグラフ表示</li>
         </ul>
         <h2 className="text-xl font-bold mt-8 mb-4 text-foreground">対応プラットフォーム</h2>
         <p>
@@ -73,7 +74,7 @@ export const OVERLAY_CONTENTS: Record<string, { title: string; body: React.React
           <div className="bg-blue-500/10 border border-blue-500/50 rounded-lg p-4 text-sm mb-4">
             <p className="font-bold mb-2">ℹ️ お願い</p>
             <p>
-              通知登録されている端末数が増加すると、運営者の大人のカードの出番がやってきてしまいます。
+              通知登録されている端末数が増加すると、運営者の大人のカードの出番がやってくるかもしれません。
             </p>
             <p className="mt-1">
               通知登録は1ユーザーあたり2端末までを目安とし、通知が不要な端末は都度登録解除していただくよう、何卒ご協力をお願いいたします。
@@ -103,7 +104,7 @@ export const OVERLAY_CONTENTS: Record<string, { title: string; body: React.React
           <h3 className="font-bold text-foreground">
             Q: 記録を間違えてタップしてしまいました。削除できますか？</h3>
           <p className="font-normal text-sm">
-            A: Tap履歴を個別に編集・削除することはできません。なお，絆ランク記録は直近10件のデータまで編集可能です。</p>
+            A: カフェタッチのTap履歴は個別に編集・削除することはできません。絆ランク記録は直近10件のデータまで削除可能です。</p>
         </div>
 
         <div className="flex flex-col gap-1">

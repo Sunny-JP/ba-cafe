@@ -11,18 +11,17 @@ interface BottomNavBarProps {
 const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, setActiveTab }) => {
   const [isDesktop, setIsDesktop] = useState(false);
 
-  // 画面幅の監視によりPC表示かスマホ表示かを動的に判定
   useEffect(() => {
     const handleResize = () => {
       setIsDesktop(window.innerWidth >= 1000);
     };
-    handleResize(); // 初期実行
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 flex border-t border-muted/10 bg-background">
+    <div className="fixed bottom-0 left-0 right-0 z-40 flex border-t border-muted/10 bg-background">
       {isDesktop ? (
         /* ==========================================
            PC用レイアウト: 2タブ構成

@@ -46,7 +46,23 @@ const Overlay = ({ contentKey, onClose }: { contentKey: string; onClose: () => v
 };
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<Tab>('timer');
+  const [activeTab, setActiveTab] = useState<Tab>(() => {
+    if (typeof window !== 'undefined') {
+      const savedTab = localStorage.getItem('last_active_tab') as Tab | null;
+      const savedTimeStr = localStorage.getItem('last_active_tab_time');
+      if (savedTab === 'timer' || savedTab === 'history' || savedTab === 'bond') {
+        if (savedTimeStr) {
+          const savedTime = parseInt(savedTimeStr, 10);
+          const now = Date.now();
+          const TEN_MINUTES = 10 * 60 * 1000;
+          if (now - savedTime < TEN_MINUTES) {
+            return savedTab;
+          }
+        }
+      }
+    }
+    return 'timer';
+  });
   const [session, setSession] = useState<any>(null);
   const [timerHistory, setTimerHistory] = useState<number[]>([]);
   const [calendarHistory, setCalendarHistory] = useState<number[]>([]);
@@ -61,6 +77,13 @@ export default function Home() {
   const [overlayKey, setOverlayKey] = useState<string | null>(null);
 
   const isInitialFetched = useRef(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && activeTab) {
+      localStorage.setItem('last_active_tab', activeTab);
+      localStorage.setItem('last_active_tab_time', Date.now().toString());
+    }
+  }, [activeTab]);
 
   const fetchRelationshipHistory = useCallback(async () => {
     const { data: { session: s } } = await supabase.auth.getSession();
@@ -78,13 +101,24 @@ export default function Home() {
     if (!session || isSyncing) return;
     setIsSyncing(true);
     try {
-      await fetch('/api/relationship', {
+      const res = await fetch('/api/relationship', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify({ char_key: charKey, bond_level: level, recorded_at: date })
       });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        alert(errorData.error || "登録に失敗しました。");
+        return;
+      }
+
       await fetchRelationshipHistory();
-    } finally { setIsSyncing(false); }
+    } catch (e) {
+      console.error(e);
+    } finally { 
+      setIsSyncing(false); 
+    }
   };
 
   const fetchMonthlyData = useCallback(async (year: number, month: number) => {
