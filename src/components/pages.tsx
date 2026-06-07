@@ -104,7 +104,7 @@ export const OVERLAY_CONTENTS: Record<string, { title: string; body: React.React
           <h3 className="font-bold text-foreground">
             Q: 記録を間違えてタップしてしまいました。削除できますか？</h3>
           <p className="font-normal text-sm">
-            A: カフェタッチのTap履歴は個別に編集・削除することはできません。絆ランク記録は直近10件のデータまで削除可能です。</p>
+            A: カフェタッチのTap履歴は個別に編集・削除することはできません。絆ランク記録は直近6件のデータまで削除可能です。</p>
         </div>
 
         <div className="flex flex-col gap-1">
