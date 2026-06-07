@@ -733,6 +733,7 @@ input[type="range"]::-moz-range-thumb {
 }
 .graph-container .recharts-tooltip-item {
   color: var(--primary) !important;
+  line-height: 0.8;
 }
 .dark .graph-container .recharts-tooltip-item {
   color: var(--secondary-foreground) !important;
