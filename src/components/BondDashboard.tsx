@@ -39,6 +39,64 @@ const TrashIcon = () => (
   </svg>
 );
 
+const CustomTooltip = ({ active, payload, label, allData }: any) => {
+  if (!active || !payload || !payload.length) return null;
+
+  const sameDayPoints = allData.filter((d: any) => d.timestamp === label);
+  if (sameDayPoints.length === 0) return null;
+
+  const dateStr = sameDayPoints[0].recorded_at;
+  
+  const hasActual = sameDayPoints.some((p: any) => !p.isPrediction);
+  const filteredPoints = sameDayPoints.filter((p: any) => {
+    if (hasActual && p.isPrediction) return false;
+    return true;
+  });
+
+  const sortedPoints = filteredPoints.sort((a: any, b: any) => b.bond_level - a.bond_level);
+  const isAllPrediction = sortedPoints.every((p: any) => p.isPrediction);
+
+  return (
+    <div 
+      className="recharts-default-tooltip"
+      style={{
+        margin: 0,
+        padding: '10px',
+        backgroundColor: 'var(--card)',
+        border: '1px solid var(--muted)',
+        borderRadius: '0.5rem',
+        fontSize: '0.85rem',
+        whiteSpace: 'nowrap'
+      }}
+    >
+      <p 
+        className="recharts-tooltip-label"
+        style={{
+          margin: '0px 0px 4px',
+          color: 'var(--foreground)',
+          fontWeight: 700
+        }}
+      >
+        {isAllPrediction ? `Estimated Date: ${dateStr}` : `Date: ${dateStr}`}
+      </p>
+
+      <ul className="recharts-tooltip-item-list" style={{ padding: 0, margin: 0, listStyle: 'none' }}>
+        {sortedPoints.map((p: any, idx: number) => (
+          <li 
+            key={idx} 
+            className="recharts-tooltip-item" 
+            style={{ display: 'block', paddingTop: '4px', paddingBottom: '4px' }}
+          >
+            <span style={{ fontWeight: 700 }}>
+              Rank {p.bond_level} {p.isPrediction ? '' : `(${p.actual_exp} exp)`}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
 export default function BondDashboard({ 
   bondHistory, 
   onSave,
@@ -132,7 +190,11 @@ export default function BondDashboard({
   const filteredHistory = useMemo(() => {
     return bondHistory
       .filter(h => h.char_key === selectedCharId)
-      .sort((a, b) => b.recorded_at.localeCompare(a.recorded_at));
+      .sort((a, b) => {
+        const dateCompare = b.recorded_at.localeCompare(a.recorded_at);
+        if (dateCompare !== 0) return dateCompare;
+        return b.bond_level - a.bond_level;
+      });
   }, [bondHistory, selectedCharId]);
 
   const displayHistoryRows = useMemo(() => {
@@ -146,8 +208,13 @@ export default function BondDashboard({
   const chartDataCombined = useMemo(() => {
     if (filteredHistory.length === 0) return { data: [], hasPrediction: false };
 
-    const actualPoints = [...filteredHistory]
-      .reverse()
+    const actualPoints = [...bondHistory]
+      .filter(h => h.char_key === selectedCharId)
+      .sort((a, b) => {
+        const dateCompare = a.recorded_at.localeCompare(b.recorded_at);
+        if (dateCompare !== 0) return dateCompare;
+        return a.bond_level - b.bond_level;
+      })
       .map(h => ({
         recorded_at: h.recorded_at,
         timestamp: new Date(h.recorded_at).getTime(),
@@ -361,39 +428,9 @@ export default function BondDashboard({
                 axisLine={true}
               />
               <Tooltip 
-                labelFormatter={(_, payload) => {
-                  if (payload && payload[0]) {
-                    const p = payload[0].payload;
-                    return p.isPrediction ? `Estimated Date: ${p.recorded_at}` : `Date: ${p.recorded_at}`;
-                  }
-                  return '';
-                }}
-                formatter={(value: any, name: any, props: any) => {
-                  const p = props.payload;
-
-                  if (p.isPrediction) {
-                    if (name === 'predicted_exp') {
-                      return [`RANK ${p.bond_level} (Est. Target)`];
-                    }
-                    return null as any;
-                  }
-
-                  if (name === 'actual_exp') {
-                    return [`RANK ${p.bond_level} (${p.actual_exp} exp)`];
-                  }
-
-                  return null as any; 
-                }}
-                contentStyle={{
-                  background: 'var(--card)',
-                  border: '1px solid var(--muted)',
-                  borderRadius: '0.5rem',
-                  fontSize: '0.85rem',
-                }}
-                labelStyle={{
-                  color: 'var(--foreground)',
-                  fontWeight: 700
-                }}
+                content={<CustomTooltip allData={graphData} />}
+                trigger="hover"
+                shared={true}
               />
               <Area 
                 type="monotone"
