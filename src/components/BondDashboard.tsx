@@ -95,6 +95,20 @@ export default function BondDashboard({
   
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    if (isSelectOpen && dropdownRef.current) {
+      setTimeout(() => {
+        const activeItem = dropdownRef.current?.querySelector('.char-dropdown-item.active');
+        if (activeItem) {
+          activeItem.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+          });
+        }
+      }, 20);
+    }
+  }, [isSelectOpen]);
+
   const selectedChar = useMemo(() => 
     CHARACTER_LIST.find(c => c.id === selectedCharId) || CHARACTER_LIST[0], 
   [selectedCharId]);
@@ -123,7 +137,7 @@ export default function BondDashboard({
 
   const displayHistoryRows = useMemo(() => {
     const rows = [];
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 6; i++) {
       rows.push(filteredHistory[i] || null);
     }
     return rows;
@@ -453,20 +467,21 @@ export default function BondDashboard({
 
           <div className="record-input-area">
             <div className="input-group-container">
-              <div className="input-field-wrapper">
+              {/* Rank フィールド */}
+              <div className="input-field-wrapper rank-field">
                 <label className="input-label">Rank</label>
                 <div className="input-content">
                   <span className="rank-value">{inputLevel}</span>
-                  <div className="spin-buttons-box">
+                  <div className="spin-buttons">
                     <button 
-                      onClick={() => setInputLevel(prev => Math.min(100, prev + 1))}
-                      className="spin-btn up"
+                      onClick={() => setInputLevel(prev => Math.min(100, prev + 1))} 
+                      className="spin-btn"
                     >
                       ▲
                     </button>
                     <button 
-                      onClick={() => setInputLevel(prev => Math.max(1, prev - 1))}
-                      className="spin-btn down"
+                      onClick={() => setInputLevel(prev => Math.max(1, prev - 1))} 
+                      className="spin-btn"
                     >
                       ▼
                     </button>
@@ -474,7 +489,8 @@ export default function BondDashboard({
                 </div>
               </div>
 
-              <div className="input-field-wrapper">
+              {/* Date フィールド */}
+              <div className="input-field-wrapper date-field">
                 <label className="input-label">Date</label>
                 <div className="input-content">
                   <input 
@@ -485,16 +501,13 @@ export default function BondDashboard({
                   />
                 </div>
               </div>
-            </div>
 
-            <button 
-              onClick={handleSave}
-              disabled={isSyncing}
-              className="btn-bond-record"
-            >
-              <span>Record</span>
-              <div>+</div>
-            </button>
+              {/* Record ボタンを同じコンテナ内に並列で配置 */}
+              <button onClick={handleSave} disabled={isSyncing} className="btn-bond-record">
+                <span>Record</span>
+                <div>＋</div>
+              </button>
+            </div>
           </div>
 
           <div className="section-wrapper">
