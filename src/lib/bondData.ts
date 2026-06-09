@@ -638,6 +638,8 @@ export const CHARACTER_LIST = [
       '『銃 可愛い 青春』': 'nb',
       '跳躍探偵ウサギ～霧に包まれた温泉での滑落～': 'nb',
       '古典の詩集': 'nb',
+      '刺繍付きのハンカチ': 'nb',
+      '百科事典': 'nb',
     } as Record<string, keyof typeof GIFT_EXP>
   },
   {
@@ -1804,6 +1806,12 @@ export const CHARACTER_LIST = [
     } as Record<string, keyof typeof GIFT_EXP>
   },
   {
+    id: 'nagusa_swimsuit',
+    name: 'ナグサ（水着）',
+    giftRatings: {
+    } as Record<string, keyof typeof GIFT_EXP>
+  },
+  {
     id: 'natsu',
     name: 'ナツ',
     giftRatings: {
@@ -2101,7 +2109,7 @@ export const CHARACTER_LIST = [
     } as Record<string, keyof typeof GIFT_EXP>
   },
     {
-    id: 'ハルカ_ドレス',
+    id: 'haruka_dress',
     name: 'ハルカ（ドレス）',
     giftRatings: {
       '最高級の楓の盆栽': 'ss',
