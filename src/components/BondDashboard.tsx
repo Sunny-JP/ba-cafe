@@ -315,7 +315,12 @@ export default function BondDashboard({
     localStorage.setItem('last_selected_char_id', selectedCharId);
     const charHistory = bondHistory
       .filter(h => h.char_key === selectedCharId)
-      .sort((a, b) => b.recorded_at.localeCompare(a.recorded_at));
+      .sort((a, b) => {
+        const dateCompare = b.recorded_at.localeCompare(a.recorded_at);
+        if (dateCompare !== 0) return dateCompare;
+        return b.bond_level - a.bond_level;
+      });
+
     if (charHistory.length > 0) {
       setInputLevel(Math.min(100, charHistory[0].bond_level + 1));
     } else {
