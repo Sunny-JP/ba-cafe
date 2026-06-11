@@ -1809,6 +1809,18 @@ export const CHARACTER_LIST = [
     id: 'nagusa_swimsuit',
     name: 'ナグサ（水着）',
     giftRatings: {
+      'おしゃれなくし': 'ss',
+      'サミュエラ「ザ・ビヨンド」': 'sa',
+      'ミルフィーユの正統派パフェ': 'sa',
+      '古典の詩集': 'na',
+      '夏模様の浮き輪': 'na',
+      'チェリーローズカラーのグロス': 'nb',
+      'お肌を透明にするBBクリーム': 'nb',
+      'ミリタリー用カモフラージュクリーム3種セット': 'nb',
+      '高級なクッキーセット': 'nb',
+      'MX-レーションC型デザート風味': 'nb',
+      '抹茶味の瓶ラムネ': 'nb',
+      '大きなホールケーキ': 'nb',
     } as Record<string, keyof typeof GIFT_EXP>
   },
   {

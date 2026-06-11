@@ -284,6 +284,7 @@ export const OVERLAY_CONTENTS: Record<string, { title: string; body: React.React
     title: "運営者情報など",
     body: (() => {
       const updateLogs = [
+        { date: '2026-06-11', content: '贈物追加: ナグサ（水着）' },
         { date: '2026-06-10', content: '新規追加: ナグサ（水着）' },
         { date: '2026-06-10', content: '贈物修正: エリカ' },
         { date: '2026-06-07', content: '絆ランク記録機能追加' },
@@ -315,7 +316,7 @@ export const OVERLAY_CONTENTS: Record<string, { title: string; body: React.React
           </div>
           <div className="flex flex-col gap-2">
             <h3 className="font-bold text-foreground border-b border-muted pb-1">変更履歴</h3>
-            <div className="show-scrollbar bg-background/50 rounded-md p-1.5 max-h-48 overflow-y-auto space-y-2 text-sm">
+            <div className="show-scrollbar bg-background/50 rounded-md p-1.5 max-h-48 overflow-y-auto space-y-1 text-sm">
               {updateLogs.map((log, index) => (
                 <div key={index} className="flex gap-3">
                   <span className="shrink-0">{log.date}</span>
