@@ -376,6 +376,20 @@ export const CHARACTER_LIST = [
     } as Record<string, keyof typeof GIFT_EXP>
   },
   {
+    id: 'anna',
+    name: 'アンナ',
+    giftRatings: {
+      'ストリートオブヤンキー1巻': 'ss',
+      '百科事典': 'na',
+      '禁断の愛～許されないからこそ美しく～': 'nb',
+      'ゲームマガジン「ヒットガールズ」': 'nb',
+      '『銃 可愛い 青春』': 'nb',
+      '跳躍探偵ウサギ～霧に包まれた温泉での滑落～': 'nb',
+      '古典の詩集': 'nb',
+      'ザ・サプリメント': 'nb',
+    } as Record<string, keyof typeof GIFT_EXP>
+  },
+  {
     id: 'iori',
     name: 'イオリ',
     giftRatings: {
@@ -679,6 +693,17 @@ export const CHARACTER_LIST = [
     } as Record<string, keyof typeof GIFT_EXP>
   },
   {
+    id: 'erina',
+    name: 'エリナ',
+    giftRatings: {
+      'ストリートオブヤンキー1巻': 'ss',
+      'おしゃれなくし': 'sa',
+      'ゲームマガジン「ヒットガールズ」': 'na',
+      '高級なクッキーセット': 'nb',
+      '刺繍付きのハンカチ': 'nb',
+    } as Record<string, keyof typeof GIFT_EXP>
+  },
+  {
     id: 'otogi',
     name: 'オトギ',
     giftRatings: {
@@ -740,6 +765,20 @@ export const CHARACTER_LIST = [
       '埋蔵金の地図': 'na',
       '天体望遠鏡': 'nb',
       '世界で最も無駄な絡繰りボックス': 'nb',
+    } as Record<string, keyof typeof GIFT_EXP>
+  },
+  {
+    id: 'kasumi_swimsuit',
+    name: 'カスミ（水着）',
+    giftRatings: {
+      'エイ～ブックレア': 'ss',
+      'レトロな卵の工芸品': 'sa',
+      '埋蔵金の地図': 'na',
+      '夏模様の浮き輪': 'na',
+      '天体望遠鏡': 'nb',
+      '世界で最も無駄な絡繰りボックス': 'nb',
+      '高級そうな欲望のつぼ': 'nb',
+      'ぜんまい式オルゴール': 'nb',
     } as Record<string, keyof typeof GIFT_EXP>
   },
   {
@@ -979,6 +1018,19 @@ export const CHARACTER_LIST = [
     } as Record<string, keyof typeof GIFT_EXP>
   },
   {
+    id: 'kokoro',
+    name: 'ココロ',
+    giftRatings: {
+      '1日3回ダンベルセット': 'ss',
+      '裁縫キット': 'sa',
+      '埋蔵金の地図': 'na',
+      '夏模様の浮き輪': 'na',
+      'ペロロの腹筋ローラー': 'nb',
+      'O-フィット': 'nb',
+      '可愛い食器セット': 'nb',
+    } as Record<string, keyof typeof GIFT_EXP>
+  },
+  {
     id: 'kotama',
     name: 'コタマ',
     giftRatings: {
@@ -1001,6 +1053,24 @@ export const CHARACTER_LIST = [
       'コスプレ用ぐるぐるメガネ': 'nb',
       '30色の絵の具セット': 'nb',
       '頭脳開発キューブパズル': 'nb',
+    } as Record<string, keyof typeof GIFT_EXP>
+  },
+  {
+    id: 'kotone',
+    name: 'コトネ',
+    giftRatings: {
+      'エイ～ブックレア': 'ss',
+      'ストリートオブヤンキー1巻': 'sa',
+      '埋蔵金の地図': 'na',
+      '夏模様の浮き輪': 'na',
+      'エーポッドプロ': 'nb',
+      '禁断の愛～許されないからこそ美しく～': 'nb',
+      'ゲームマガジン「ヒットガールズ」': 'nb',
+      '『銃 可愛い 青春』': 'nb',
+      'ゲームガールカラー復刻版': 'nb',
+      '跳躍探偵ウサギ～霧に包まれた温泉での滑落～': 'nb',
+      '古典の詩集': 'nb',
+      '百科事典': 'nb',
     } as Record<string, keyof typeof GIFT_EXP>
   },
   {

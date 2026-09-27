@@ -6,6 +6,10 @@ interface UpdateLog {
 
 export const UPDATE_LOGS: UpdateLog[] = [
   { 
+    date: '2026-09-27', 
+    content: '新規追加: コトネ，ココロ，カスミ（水着），エリナ，アンナ' 
+  },
+  { 
     date: '2026-08-10', 
     content: '新規追加: サツキ（水着），マコト（水着），チアキ（水着），イブキ（水着），イロハ（水着）' 
   },
