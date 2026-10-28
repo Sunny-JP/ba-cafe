@@ -210,6 +210,19 @@ export const CHARACTER_LIST = [
     } as Record<string, keyof typeof GIFT_EXP>
   },
   {
+    id: 'azusa_racing',
+    name: 'アズサ（レーシング）',
+    giftRatings: {
+      '1日3回ダンベルセット': 'ss',
+      'レースの枕': 'sa',
+      'リボンのついた熊のぬいぐるみ': 'na',
+      'ウェーブキャットの枕': 'nb',
+      'ペロロの腹筋ローラー': 'nb',
+      'ゼリーズの枕': 'nb',
+      'O-フィット': 'nb',
+    } as Record<string, keyof typeof GIFT_EXP>
+  },
+  {
     id: 'asuna',
     name: 'アスナ',
     giftRatings: {
@@ -1845,6 +1858,19 @@ export const CHARACTER_LIST = [
     } as Record<string, keyof typeof GIFT_EXP>
   },
   {
+    id: 'tsumugi',
+    name: 'ツムギ',
+    giftRatings: {
+      '音楽演奏会入場券': 'ss',
+      '跳躍探偵ウサギ～霧に包まれた温泉での滑落～': 'na',
+      'エーポッドプロ': 'nb',
+      'コスプレ用ぐるぐるメガネ': 'nb',
+      '食虫植物の植木鉢': 'nb',
+      '高級そうな欲望のつぼ': 'nb',
+      'ぜんまい式オルゴール': 'nb',
+    } as Record<string, keyof typeof GIFT_EXP>
+  },
+  {
     id: 'tsurugi',
     name: 'ツルギ',
     giftRatings: {
@@ -2452,6 +2478,19 @@ export const CHARACTER_LIST = [
       'ペロロの腹筋ローラー': 'na',
       '夏模様の浮き輪': 'na',
       'ウェーブキャットの枕': 'nb',
+    } as Record<string, keyof typeof GIFT_EXP>
+  },
+  {
+    id: 'hifumi_racing',
+    name: 'ヒフミ（レーシング）',
+    giftRatings: {
+      'サミュエラ「ザ・ビヨンド」': 'ss',
+      'レースの枕': 'sa',
+      '1日3回ダンベルセット': 'sa',
+      'ペロロの腹筋ローラー': 'na',
+      'ウェーブキャットの枕': 'nb',
+      'ゼリーズの枕': 'nb',
+      'O-フィット': 'nb',
     } as Record<string, keyof typeof GIFT_EXP>
   },
   {
@@ -3243,6 +3282,22 @@ export const CHARACTER_LIST = [
       'MX-レーションC型デザート風味': 'nb',
       '抹茶味の瓶ラムネ': 'nb',
       'チェリーローズカラーのグロス': 'nb',
+    } as Record<string, keyof typeof GIFT_EXP>
+  },
+  {
+    id: 'rana',
+    name: 'ラナ',
+    giftRatings: {
+      'エイ～ブックレア': 'ss',
+      'ストリートオブヤンキー1巻': 'sa',
+      '百科事典': 'na',
+      'エーポッドプロ': 'nb',
+      '禁断の愛～許されないからこそ美しく～': 'nb',
+      'ゲームマガジン「ヒットガールズ」': 'nb',
+      '『銃 可愛い 青春』': 'nb',
+      'ゲームガールカラー復刻版': 'nb',
+      '跳躍探偵ウサギ～霧に包まれた温泉での滑落～': 'nb',
+      '古典の詩集': 'nb',
     } as Record<string, keyof typeof GIFT_EXP>
   },
   {

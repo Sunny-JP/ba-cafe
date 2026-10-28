@@ -1,10 +1,14 @@
 interface UpdateLog {
   date: string;
   content: string;
-  comment?: string; // 更新ごとの個別コメント（オプショナル）
+  comment?: string;
 }
 
 export const UPDATE_LOGS: UpdateLog[] = [
+  { 
+    date: '2026-10-29', 
+    content: '新規追加: ツムギ，ラナ，アズサ（レーシング），ヒフミ（レーシング）' 
+  },
   { 
     date: '2026-09-27', 
     content: '新規追加: コトネ，ココロ，カスミ（水着），エリナ，アンナ' 
